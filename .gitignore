@@ -1,0 +1,7 @@
+# state.py 的输出，每次运行都会重写，不该进版本库
+.state.json
+# insert_issue.py 的临时语法校验文件
+.check.js
+# Python 字节码
+__pycache__/
+*.pyc

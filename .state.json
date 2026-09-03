@@ -1,30 +1,45 @@
 {
-  "next_id": "004",
+  "next_id": "006",
   "today": "2026-09-03",
   "avoid_sectors": [
     "物流与航运",
-    "材料与电池"
+    "金融科技与支付"
   ],
   "used_sectors": [
     "物流与航运",
+    "金融科技与支付",
     "材料与电池",
     "AI 与能源"
   ],
   "used_english": [
-    "raise a concern / flag something up",
-    "Then again, …",
-    "…, only to + 动词原形",
+    "make a case for / make a case that…",
+    "The thing with X is (that)…",
+    "give it a miss",
     "If anything, …",
     "It's not that…, it's more that…",
     "can't be bothered (to / with)"
   ],
   "issues": [
     {
-      "id": "003",
+      "id": "005",
       "date": "2026-09-03",
       "sector": "物流与航运",
       "title": "绕行红利",
       "web": "https://claude.ai/code/artifact/4d464cb3-23c5-4036-aed8-a74a71678dfc"
+    },
+    {
+      "id": "004",
+      "date": "2026-09-02",
+      "sector": "金融科技与支付",
+      "title": "填不满的地址栏",
+      "web": "https://claude.ai/code/artifact/a9aa4809-faea-4808-924f-24380360ec00"
+    },
+    {
+      "id": "003",
+      "date": "2026-09-01",
+      "sector": "物流与航运",
+      "title": "两条运河的拔河",
+      "web": "https://claude.ai/code/artifact/2bc7041c-97d5-4db5-a315-cf070c73ece7"
     },
     {
       "id": "002",

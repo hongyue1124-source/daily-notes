@@ -103,7 +103,8 @@ def main():
     used_en, day_rows = [], []
     for d in eng_days:
         dt = field(d, 'date')
-        ens = re.findall(r'\ben\s*:\s*"((?:[^"\\]|\\.)*)"', d)
+        # 同时支持 en:"x"（手写 JS）和 "en": "x"（insert_issue.py 生成的 JSON）
+        ens = re.findall(r'"?\ben"?\s*:\s*"((?:[^"\\]|\\.)*)"', d)
         day_rows.append((dt, len(ens)))
         used_en += ens
 

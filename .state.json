@@ -1,0 +1,45 @@
+{
+  "next_id": "004",
+  "today": "2026-09-03",
+  "avoid_sectors": [
+    "物流与航运",
+    "材料与电池"
+  ],
+  "used_sectors": [
+    "物流与航运",
+    "材料与电池",
+    "AI 与能源"
+  ],
+  "used_english": [
+    "raise a concern / flag something up",
+    "Then again, …",
+    "…, only to + 动词原形",
+    "If anything, …",
+    "It's not that…, it's more that…",
+    "can't be bothered (to / with)"
+  ],
+  "issues": [
+    {
+      "id": "003",
+      "date": "2026-09-03",
+      "sector": "物流与航运",
+      "title": "绕行红利",
+      "web": "https://claude.ai/code/artifact/4d464cb3-23c5-4036-aed8-a74a71678dfc"
+    },
+    {
+      "id": "002",
+      "date": "2026-08-30",
+      "sector": "材料与电池",
+      "title": "锂的新买家",
+      "web": "https://claude.ai/code/artifact/14476341-cdbe-42a6-88f2-1c6b50212260"
+    },
+    {
+      "id": "001",
+      "date": "2026-08-29",
+      "sector": "AI 与能源",
+      "title": "谁为 AI 的电付钱",
+      "web": "https://claude.ai/code/artifact/d1995a23-201a-4761-af33-28d2c51600c3"
+    }
+  ],
+  "missing_web": []
+}

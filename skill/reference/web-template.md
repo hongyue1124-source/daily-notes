@@ -1,0 +1,90 @@
+# 网页版 artifact 视觉规格
+
+每期发一个**新** artifact（不覆盖旧期），favicon `📓`，标题用当期主题的**短名词短语**
+（如「绕行红利」），不要加副标题式的解释后缀。
+
+参考实现：第 003 期 https://claude.ai/code/artifact/4d464cb3-23c5-4036-aed8-a74a71678dfc
+
+---
+
+## 基调
+
+报纸 / 金融文档风格。深墨绿 `#1E5D4B` 为唯一强调色。
+
+```
+字体   正文 Newsreader（衬线），标签与数字 IBM Plex Mono
+        中文回退 'Songti SC','Noto Serif CJK SC'
+栅格   左侧 § 编号栏(104px) + 主栏(max 66ch) + 右侧术语边注栏(236px)
+        ≤1080px 边注降到正文下方多列；≤660px 单栏，§ 编号变成行内标签
+```
+
+## 配色 token
+
+浅色：
+
+```
+--paper #F7F5F0   --paper-2 #FFFFFF   --paper-sunk #EEEBE3
+--ink #1B1F1D     --ink-2 #42504A     --ink-3 #77857E
+--rule #D6D2C7    --rule-soft #E4E0D6
+--green #1E5D4B   --green-wash #E7EFEA   --on-green #F2F7F4
+--rust #8A4B2A    --rust-wash #F5EAE2     --gold #6E5A1E
+```
+
+深色（`@media (prefers-color-scheme:dark)` 里 `:root:not([data-theme="light"])`，
+外加 `:root[data-theme="dark"]` 两处都要写）：
+
+```
+--paper #121614   --paper-2 #181D1A   --paper-sunk #1D2320
+--ink #E8EAE6     --ink-2 #B3BEB8     --ink-3 #7E8C85
+--rule #2C3733    --rule-soft #232C29
+--green #6FBFA2   --green-wash #182A24   --on-green #0C1512
+--rust #D08D62    --rust-wash #2A1E17     --gold #C4A94F
+```
+
+**深浅色的坑**：绿色在浅色模式是深绿（配浅字），在深色模式是浅薄荷（配深字）。
+所以「绿底卡片上的字色」必须走 `--on-green` token，不要写死颜色，也不要靠媒体查询打补丁。
+
+---
+
+## 必须有的组件
+
+| 组件 | 说明 |
+|---|---|
+| 报头 | 期号胶囊 + 行业 + 大标题 + 斜体副题 + 导读（左侧绿色竖线）+ 一行元信息（日期/时长/视角/本周锚点） |
+| § 编号栏 | `position:sticky`，显示 `§1` + tag + 一小段绿色横杠 |
+| 本节回答 | 绿底小框，等宽字，顶部一行大写小标签「本节回答」 |
+| 推理链 | 左侧竖线 + 节点圆点 + 等宽大写标签（① 事实 / ② 按常理…） |
+| 箭头链 | 沉底色块，等宽字，箭头用绿色 |
+| 数字表格 | 等宽 tabular-nums；涨绿跌橙；**外层 `overflow-x:auto`**，页面本身绝不横向滚动 |
+| 风险提示框 | 赭色边框 + 实心标题条「但请注意」 |
+| 引语 | 左侧 3px 绿线，斜体，21px |
+| takeaway 卡片 | 绿底大字，`color:var(--on-green)` |
+| 盯什么 | 三行，左侧等宽编号 01/02/03 |
+| 右侧边注 | 术语卡（绿线）与数字卡（金线，含一个特大等宽数字） |
+| 术语表 | `<dl>` 网格，中文 + 等宽英文 + 一句话解释 |
+| 来源列表 | 日期（等宽小字）+ 标题（绿色下划线链接）+ 一行"这条支撑了什么" |
+| 明日预告 | 虚线框 |
+| 版记 | 期号、日期、行业轮换记录、"标注我的解读的是作者推断"声明 |
+
+---
+
+## 硬性约束
+
+- **不要写 `<!DOCTYPE>` / `<html>` / `<head>` / `<body>`** —— Artifact 工具发布时会套骨架。
+  直接从 `<title>` 和 `<style>` 开始写。
+- 外部资源只有 Google Fonts 能用（`fonts.googleapis.com` + `fonts.gstatic.com`）。
+  其余一律内联，图片用 data: URI。
+- 每种字体都要给真实的回退栈（中文回退必须写，否则 CJK 会掉到默认字体）。
+- 深浅两套配色都要能看，`body` 必须显式给背景色 token。
+- 宽内容（表格、代码块）在自己的 `overflow-x:auto` 容器里滚，**页面 body 绝不横向滚动**。
+
+---
+
+## 发布前看一眼
+
+```bash
+# 本地包一层骨架再截图（artifact 的骨架不在文件里）
+node -e '…' # 见 skill/scripts 里的做法：包 doctype+head → 1280 宽截图
+```
+
+至少确认：报头没有断行事故、三栏没有塌、表格没有撑破页面、深色模式下绿底卡片的字看得见。

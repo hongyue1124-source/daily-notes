@@ -334,6 +334,29 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
   color:var(--muted);padding:22px 20px 10px;display:flex;align-items:baseline;gap:10px}
 .daylbl b{color:var(--accent-ink);font-weight:600}
 
+.secq{font-family:var(--mono);font-size:12.5px;line-height:1.72;color:var(--accent-ink);
+  background:var(--accent-bg);border:1px solid var(--accent);border-radius:2px;
+  padding:12px 14px;margin:0 0 20px}
+.secq b{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  opacity:.75;margin-bottom:5px;font-weight:600}
+.flowline{font-family:var(--mono);font-size:12.5px;line-height:2;background:var(--surface-2);
+  border:1px solid var(--hair);border-radius:2px;padding:14px 16px;margin:0 0 18px}
+.flowline .ar{color:var(--accent-ink);font-weight:600;padding:0 3px}
+.chain{list-style:none;padding:0;margin:0 0 18px;border-left:2px solid var(--rule)}
+.chain li{position:relative;margin:0 0 2px;padding:9px 0 9px 18px;font-size:15.5px;line-height:1.75}
+.chain li::before{content:"";position:absolute;left:-5px;top:20px;width:8px;height:8px;
+  border-radius:50%;background:var(--paper);border:2px solid var(--accent)}
+.chain li b.k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent-ink);margin-bottom:3px}
+
+/* 有新一期时顶部出现的更新条 */
+#updbar{position:fixed;left:0;right:0;top:0;z-index:100;width:100%;
+  padding:calc(var(--safe-t) + 11px) 16px 11px;border:none;
+  background:var(--accent);color:var(--on-accent);
+  font-family:var(--mono);font-size:12.5px;font-weight:600;letter-spacing:.06em;
+  text-align:center;box-shadow:0 2px 14px rgba(0,0,0,.2)}
+#updbar:active{opacity:.85}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -410,12 +433,165 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
   <div class="rbody" id="rBody"></div>
 </div>
 
+<button id="updbar" hidden>有新一期 · 点这里更新</button>
 <div id="veil"></div>
 <div id="sheet" role="dialog" aria-modal="true"></div>
 
 <script>
 /* ═══════════ 数据 ═══════════ */
 const ISSUES = [
+{
+  id:"003", date:"2026-09-03", sector:"物流与航运", title:"绕行红利", minutes:15,
+  deck:'2026 年 1 月，权威咨询机构 Drewry 预测今年集装箱运价会<b>再跌约 17%</b>。可到 8 月 27 日，它自己编制的运价指数比 5 月初<b>翻了近一倍</b>；同一时间，集装箱船在手订单冲到船队规模的 <b>39%</b>，2010 年以来最高。需求没变好，船越订越多，运价凭什么翻倍？',
+  takeaway:'“今年全球航运赚的钱，很大一部分不是因为世界多买了东西，而是因为船被迫多绕了路。所以航运公司眼下下的这笔史上最大的造船订单，本质上是在押注中东的冲突不会很快结束——一个行业的盈利模型，走到了和世界的和平进程直接对立的位置。”',
+  next:'换赛道：<b>生物科技与制药</b>。专利悬崖与「买管线」的经济学——当一家药企最赚钱的药即将失去独占权，它手里的现金会流向哪里？以及为什么这一件事，决定了整个生物科技初创圈的估值。',
+  web:"https://claude.ai/code/artifact/4d464cb3-23c5-4036-aed8-a74a71678dfc",
+  sections:[
+    {n:"§1",tag:"问题",h:"航运公司卖的其实不是船",
+     q:"海运的「运力」到底是什么？为什么它可以在一艘船都没沉、一个船厂都没停工的情况下，凭空少掉一大块？",
+     blocks:[
+      {t:"p",v:'全球商品贸易量的八成以上由海运承担（联合国贸发会议口径）。理解本期只需要一个直觉：<b>航运公司卖的不是船，是「舱位 × 时间」。</b>一艘船的价值不在于能装多少个箱子，而在于一年能把这些箱子送到目的地几次。船是资产，航次才是产品。'},
+      {t:"p",v:'平时这个区别看不出来，因为航线长度固定。可一旦航线被迫改变，它就成了决定一切的变量。红海受阻后，亚洲—欧洲、亚洲—美东航线改绕好望角，每航次多走 <b>10–14 天</b>，一艘船一年因此少跑一到两个来回——<b>船没有损坏、没有减速，但它一年能提供的运输服务少了一大块。</b>'},
+      {t:"p",v:'所以航运业衡量需求不用「箱数」，而用 <b>[[箱-海里]]</b>（TEU-mile，一个标准箱运输一海里）。这个差别，是本期所有反直觉现象的源头：'},
+      {t:"flow",v:['箱子数量不变','每个箱子被迫多走几千海里','[[TEU]] 不变，TEU-mile 大涨','完成同样的贸易量，需要更多的船']},
+      {t:"p",v:'换句话说：<b>地图可以在世界没有多买一件东西的情况下，凭空创造或消灭运力。</b>2026 年 7 月的实际数字是，全球 TEU-mile 需求同比增长 <b>7.3%</b>，船队运力增长 <b>5.4%</b>，需求多跑了 <b>1.9 个百分点</b>。航运公司今年的定价权全建立在这 1.9 个百分点上，而它来自「绕路」，不是「多买」。'},
+      {t:"p",v:'这也是关心投资的人该看一眼航运的原因：它是极少数<em>价格由地图决定、而非由消费者决定</em>的行业。'}
+    ]},
+    {n:"§2",tag:"背景",h:"关上霍尔木兹的不是导弹，是保险",
+     q:"一条海峡，在没有被物理封锁、美国海军还在巡逻的情况下，是被什么东西关上的？",
+     blocks:[
+      {t:"p",v:'霍尔木兹海峡是波斯湾唯一的出海口，危机前全球约四分之一的海运石油、五分之一的液化天然气经此出口。2026 年 2 月 28 日美以空袭伊朗后，海峡进入实质关闭状态，到 9 月 2 日已是第 <b>185 天</b>：8 月 30 日全天通过的商船只有 <b>6 艘</b>，正常约每天 85 艘——只剩 <b>7%</b>。'},
+      {t:"p",v:'这里值得停下来想：海峡最窄处仍有几十公里宽，水雷已被美军中央司令部宣布清除，美国海军就在走廊上巡逻。既然通道没被堵死，为什么船不走？答案是保险。'},
+      {t:"h4",v:"战争险如何变成一道闸门"},
+      {t:"p",v:'船舶出海必须投保 <b>[[战争险]]</b>，保费按船体价值的百分比逐航次计收。危机前约 <b>0.2%–0.25%</b>，冲突爆发后 48 小时内跳到 <b>1%</b>——一艘一亿美元的油轮，单趟保费从约 20 万美元变成 <b>100 万美元</b>，单这一项就足以吃掉整趟航程的利润。'},
+      {t:"p",v:'更关键的是接下来的事：3 月 5 日起，Gard、Skuld、NorthStandard、伦敦与美国五家 <b>[[保赔协会]]</b> 停止为该海域承保。不是涨价，是退出。一旦没有保险，整条商业链条就断了：'},
+      {t:"flow",v:['保险公司退出','银行不接受这批货的信用证与押汇','租家不敢签租约','船东即便愿意冒险也接不到货','船不开']},
+      {t:"p",v:'<b>要关闭一条世界级航道，你不需要击沉任何一艘船。你只需要让保险公司退出。</b>这也解释了为什么美军宣称「几乎完全控制」海峡的同时，通行量仍只有平时的百分之几：军事控制解决「能不能过」，保险解决「敢不敢过」，后者才是商业世界真正的开关。'},
+      {t:"h4",v:"一个 60 天的窗口，以及它的到期日"},
+      {t:"p",v:'6 月中旬，美伊在巴基斯坦斡旋下签署《伊斯兰堡备忘录》。双方对文本各有解读，但有一条明确：伊朗承诺商船安全通行，<b>且仅在 60 天内免收费用</b>——这 60 天在 <b>8 月中旬</b>到期。签署后保费一度回落，市场开始按「风险在下降」定价。<b>这个假设，构成了本周事件的全部背景。</b>'}
+    ]},
+    {n:"§3",tag:"本周事件",h:"两枚弹药，和一笔一千三百万箱的赌注",
+     q:"两艘几乎没有受到实质损伤的油轮，为什么能让油价跳 5%？以及：需求明明在走弱，运价凭什么翻了一倍？",
+     blocks:[
+      {t:"p",v:'8 月 31 日，在阿曼附近、美军巡逻的所谓安全走廊内，两艘超大型油轮相隔几分钟先后被不明弹药击中：沙特 Bahri 的「Sidr」号与韩国 Sinokor 运营的「Senegal Prosperity」号。<b>结果是：无人员伤亡，无油污泄漏，两艘船都没有沉没。</b>'},
+      {t:"p",v:'从物理损失看，这几乎是一次「什么都没发生」的事件。可布伦特原油当天上涨约 <b>5%</b>，逼近每桶 95 美元，创六周新高；当天通过海峡的商船只剩 <b>5 艘</b>。'},
+      {t:"p",v:'为什么物理损失接近于零的事件能撬动 5% 的油价？因为<b>市场定价的从来不是已发生的损失，而是未来的概率分布</b>。推理链是这样的：'},
+      {t:"flow",v:['6 月备忘录后保费回落，市场默认风险在下降','8 月中旬 60 天免费通行期到期','8 月 31 日两船几分钟内先后被击中，判定为协同袭击','「风险在下降」的假设被击碎','保费重新定价']},
+      {t:"h4",v:"本期真正的反常：需求在缩，船却越订越多"},
+      {t:"p",v:'把镜头拉远，本周另一组数字才是重点。下面四步连起来，才构成问题。'},
+      {t:"chain",items:[
+        ["① 事实",'2026 年 1 月，权威咨询机构 Drewry 判断：全球箱量只增长 <b>1.8%</b>，运价将<b>再跌约 17%</b>（2025 年已跌 18%）。它称之为「暴风雨前的平静」——2024–2025 年订下的船将在 2027–2029 年集中交付，运力年增 <b>6%–9%</b>，远超需求。'],
+        ["② 按常理该推出什么",'需求弱 → 新船大量下水 → 运力过剩 → 运价下跌 → 船东应立刻停止订船。这是教科书答案，也是 Drewry 自己写下的预测。'],
+        ["③ 实际却是",'8 月 27 日，Drewry 自己编制的世界集装箱运价指数报每 40 尺箱 <b>4,473 美元</b>；5 月 7 日还是 <b>2,286 美元</b>——四个月翻了近一倍，而不是跌 17%。同期在手订单不降反升，冲到船队的 <b>39%</b>：1,630 艘、<b>1,328 万 [[TEU]]</b>，2010 年以来最高（[[在手订单占船队比例]]）。'],
+        ["④ 所以问题是",'需求没有变好，船越订越多，运价凭什么翻倍？那些掏出几百亿美元订船的人，究竟在赌什么？']
+      ]},
+      {t:"table",cap:"运价没有按预测下跌，而是翻倍（美元 / 40 尺箱）",head:["时点","WCI 综合","上海—纽约","周环比"],rows:[
+        ["2026 年 1 月预测",["n","全年 −17%"],["n","—"],["n","—"]],
+        ["5 月 7 日",["n","2,286"],["n","3,721"],["n up","+3%"]],
+        ["7 月 3 日",["n","4,530"],["n","7,902"],["n up","+9%"]],
+        ["8 月 27 日",["n","4,473"],["n","9,333"],["n dn","−1%"]]
+      ]},
+      {t:"p",v:'（数据来源：Drewry World Container Index，经 gCaptain / IndexBox / Daily Cargo News 转引。）'},
+      {t:"h4",v:"答案：他们赌的不是需求，是距离"},
+      {t:"p",v:'回到 §1 那 1.9 个百分点。船东下单看的不是「世界会不会多买东西」，而是「货会不会继续绕远路」。行业称之为 <b>[[绕行红利]]</b>——收入增长不来自贸易量，来自被迫多走的距离。'},
+      {t:"p",v:'<b>所以这 1,328 万 TEU 的订单，本质上是用钢铁对冲地缘政治：押注红海和霍尔木兹的绕行，会持续到 2028–2029 年这批新船交付之后。</b>'},
+      {t:"p",v:'顺着这个逻辑，8 月 31 日那两枚弹药对船东是利好：它把「和平」的概率又推远了一点。<b>一个行业的盈利模型，走到了和世界的和平进程直接对立的位置。</b>这不是道德判断，是资产负债表的算术。'},
+      {t:"risk",items:[
+        '<b>赌反了无法撤销。</b>光 2028 一年就要交付创纪录的约 540 万 TEU。若在那之前航道恢复正常，被绕行吃掉的运力会在几周内全部回到市场。',
+        '<b>1,328 万 TEU 不等于净增 1,328 万 TEU。</b>按 Alphaliner 口径，前十大班轮公司在手订单约 44% 属于替换老船，真实净增运力明显更小。',
+        '<b>市场已经给和平定了价，而且价很低。</b>预测市场对海峡 9 月 15 日前恢复正常的定价是 1%，年底前 27%。<span class="flag">我的解读</span>反过来说：和平若提前到来，将是一个被严重低估的冲击。',
+        '<b>运价动能其实已在减弱。</b>8 月 27 日当周 WCI 环比跌 1%，上海—鹿特丹跌 3%。这是一个高位，但不是还在往上走的高位。'
+      ]}
+    ]},
+    {n:"§4",tag:"另一条腿",h:"绕路的账单，最后由谁付",
+     q:"绕行多出来的成本落到了谁头上？为什么在同一场危机里，有的公司利润创纪录、有的公司利润几乎腰斩再腰斩？",
+     blocks:[
+      {t:"p",v:'把「绕行红利」当成天上掉下来的钱，是最容易犯的错。绕行同时抬高了运价（收入端）<em>和</em>成本（支出端）：它不创造财富，而是一次<b>再分配</b>——在承运商之间、在承运商与货主之间、最终在企业与消费者之间。今年二季度的两份财报说明了这一点。'},
+      {t:"table",cap:"同一个季度，同一场危机，两个方向（美元）",head:["公司","营收","利润","全年指引"],rows:[
+        ["马士基 Maersk",["n","未单独披露"],["n up","[[EBITDA]] 30 亿（预期 21.2 亿）"],["n up","年内第二次上调至 105–125 亿"]],
+        ["赫伯罗特 Hapag-Lloyd",["n up","58.4 亿（去年 52.7 亿）"],["n dn","集团净利 0.83 亿（去年 3.06 亿）"],["n","EBITDA 27–37 亿"]]
+      ]},
+      {t:"p",v:'赫伯罗特这一栏值得逐行读。它的<b>收入端全线上行</b>：营收从 52.7 亿涨到 58.4 亿美元，箱量从 336 万涨到 348 万 TEU，单箱运价还涨了 9%。按常理，量涨、价涨、收入涨，利润理应跟着涨。可集团净利润却从 3.06 亿美元掉到 8,300 万，只剩四分之一——霍尔木兹封锁带来的燃油、保险、仓储、绕行与内陆运输成本，一季度吃掉约 <b>6 亿美元</b>。'},
+      {t:"p",v:'<b>收入上涨和利润上涨，在这个行业里是两件不同的事。</b>谁赢谁输，取决于航线结构、燃油对冲、保险条款和中东敞口。'},
+      {t:"h4",v:"成本一层层往下传"},
+      {t:"flow",v:['保险公司提价 / 退出','船公司加征附加费','货主（品牌商、进口商）','零售价格']},
+      {t:"p",v:'中间那一步看得见：5 月，地中海航运把亚洲—美东的紧急燃油附加费从每 40 尺箱 430 美元提到 <b>644 美元</b>，达飞轮船加收每箱 <b>2,000 美元</b>旺季附加费。每一层只能把一部分成本推给下一层，剩下的自己吃。'},
+      {t:"h4",v:"一笔不写在价格里的账：时间"},
+      {t:"p",v:'7 月，全球班轮 <b>[[准班率]]</b> 跌到 <b>56.4%</b>，是 2026 年最差的一个月，比 6 月低 6.1 个百分点，晚到船舶平均延误 6.06 天。这意味着进口商无法预测到货时间，只能加厚安全库存对冲——<b>而库存要占用资金。</b>这笔成本以营运资金的形式压在货主账上，永远不会出现在任何一张运价表里。'},
+      {t:"h4",v:"地图正在被重画"},
+      {t:"p",v:'迪拜杰贝阿里港曾是中东最大转运枢纽，上半年吞吐 <b>314 万 TEU</b>，去年同期 777 万——跌近六成，全球排名从第 10 掉到第 32。同期宁波舟山港以 <b>2,290 万 TEU</b> 首次超过新加坡的 2,270 万。<span class="flag">我的解读</span>这不是「谁效率更高谁排名更前」的竞赛，而是风险溢价：货流和资本在为「离冲突更远」付费。'}
+    ]},
+    {n:"§5",tag:"历史",h:"上一次船东这样下单，是 2004 到 2009 年",
+     q:"历史上出现过同样规模的造船潮吗？当时船东在想什么，结局又是什么？哪些地方像，哪些地方不像？",
+     blocks:[
+      {t:"p",v:'咨询机构 Linerlytica 的说法是：上一次在手订单占船队比例超过今天这个水平，是 2004 到 2009 年那一轮，结果是「一个花了十年才消化掉的运力过剩」。当年下单的理由同样充分：中国刚入世，全球贸易进入超级周期，运价与利润连年创新高。然后 2008 年 9 月，雷曼兄弟倒闭。'},
+      {t:"h4",v:"2009 年的账单"},
+      {t:"ul",v:[
+        '全球集装箱 <b>TEU-mile 需求下跌 12.4%</b>——跌的正是今天在涨 7.3% 的那个指标。',
+        '当年 4 月，封存闲置的集装箱船约 130 万 TEU，占世界船队 <b>10.4%</b>；到秋天超过 12%。',
+        '全行业当年经营亏损超过 <b>200 亿美元</b>，前三季度经营利润率在 −17% 到 −19% 之间。',
+        '2008 年 9 月到 2010 年 2 月，船东合计取消 140 艘、43.6 万 TEU 订单——只占 2008 年 10 月在手订单的 <b>6.7%</b>。'
+      ]},
+      {t:"p",v:'<b>最后那个 6.7% 是本节最值得记住的数字。</b>即使遇上百年一遇的金融危机、明知船交下来就是亏损，能被取消的订单也不到十五分之一。<em>造船合同一旦签下，就不再是选择权，而是义务。</em>这正是今天那 1,328 万 TEU 的性质。'},
+      {t:"h4",v:"像的地方"},
+      {t:"ul",v:[
+        '都是在运价与利润的高点下单，用当期现金流为未来三到五年的产能买单。',
+        '都有「这次不一样」的叙事撑着：当年是入世后的贸易超级周期，今天是地缘绕行。',
+        '交付高峰都落在三四年后——落在一个下单时没人能预测的世界里。'
+      ]},
+      {t:"h4",v:"不像的地方"},
+      {t:"ol",v:[
+        '<b>风险方向恰好相反。</b>2008 年打掉需求的是金融危机——外生、突然、事前几乎无法定价。今天威胁这笔赌注的不是「需求崩了」，而是「和平来了」：一个所有人都盯着、可以下注的事件。',
+        '<b>净增运力比例更低。</b>今天前十大班轮公司在手订单约 44% 是替换老船，2000 年代那轮的净扩张成分更高。',
+        '<b>多了一个 2009 年没有的减震器。</b>班轮业集中度远高于当年，承运商用 <b>[[停航]]</b> 收缩运力的能力更强——今年 5 月亚洲—北欧有效运力被主动压低 3%，亚洲—地中海压低 10%。但减震器只在参与者愿意配合时有效，而 Linerlytica 对当下的措辞是「为市场份额的无休止争夺」。<span class="flag">我的解读</span>那是联盟纪律在瓦解而非在生效时的行为，所以这条「不像」未必可靠。'
+      ]},
+      {t:"p",v:'所以这里不下断言，历史不会简单重演。它提供的只是一个概率提示：<b>当一个行业的盈利依赖于一个它无法控制、而且多数人都希望尽快结束的外部条件时，用长周期重资产押注这个条件持续，最大的风险不在需求端，而在假设端。</b>'}
+    ]},
+    {n:"§6",tag:"拿走",h:"能跟人聊的一句话，和三个盯的指标",
+     q:"如果只从这一期带走一件事，应该是什么？以及接下来该盯哪些可以观察的指标？",
+     blocks:[
+      {t:"takeaway",lbl:"能跟人聊的一句话",v:'“今年全球航运赚的钱，很大一部分不是因为世界多买了东西，而是因为船被迫多绕了路。所以航运公司眼下下的这笔史上最大的造船订单，本质上是在押注中东的冲突不会很快结束——一个行业的盈利模型，走到了和世界的和平进程直接对立的位置。”'},
+      {t:"p",v:'如果对方追问，可以补一句：判断这个行业最关键的指标不是运价，是<em>船在海上跑的距离</em>。运力＝船的数量 × 每年航次，而航次由航线长度决定。'},
+      {t:"h4",v:"接下来盯什么"},
+      {t:"watch",items:[
+        ["01","战争险费率（占船体价值的百分比）","战前 0.2%–0.25%，峰值 1%。保费是海峡真正的闸门，且比油价和运价更早反应——保险公司必须先于所有人给风险定价。费率回落＝通行恢复的第一个可靠信号。"],
+        ["02","集装箱船在手订单占船队比例","现在 39%。突破 40% 说明船东在为「绕行长期化」加码；开始回落，说明连船东都不信它能撑到 2029 年交付高峰。这是行业用真金白银投出的信心票。"],
+        ["03","霍尔木兹与苏伊士的实际通过艘数","盯艘数，别盯新闻里的「协议」——今年 4 月和 6 月都出现过宣布重开、随即反复。艘数一旦持续回升，被绕行吃掉的运力会在数周内回流，运价与航运股首当其冲。"]
+      ]}
+    ]}
+  ],
+  terms:[
+    {zh:"TEU",en:"twenty-foot equivalent unit",def:"二十英尺标准集装箱，全行业统一的运力计量单位。一个 20 尺箱＝1 TEU，40 尺箱＝2 TEU。运价通常按 40 尺箱（FEU）报价。"},
+    {zh:"箱-海里",en:"TEU-mile",def:"一个标准箱运输一海里。衡量海运需求的正确单位，同时包含「运多少」和「运多远」——箱量零增长时，它仍可能大涨。"},
+    {zh:"战争险",en:"War risk insurance",def:"覆盖战争、扣押、水雷、导弹等风险的船舶保险，按船体价值的百分比逐航次计收，与常规船壳险分开购买。"},
+    {zh:"保赔协会",en:"P&amp;I Club",def:"船东互助性质的责任保险组织，承保第三方责任、人身伤亡与污染赔偿。它们集体退出某片海域，等于让该海域的商业航行停摆。"},
+    {zh:"在手订单占船队比例",en:"Orderbook-to-fleet ratio",def:"已下单未交付运力 ÷ 现有船队运力。因为造船周期约三年，它是判断未来 2–4 年运力过剩风险的核心先行指标。"},
+    {zh:"绕行红利",en:"Diversion dividend",def:"主要航道受阻、船舶被迫绕远路而额外产生的运力需求与运价上涨。收入的增长来自距离，而非贸易量。"},
+    {zh:"停航",en:"Blank sailing",def:"班轮公司主动取消某一航次，以收缩有效运力、支撑运价。当代承运商最主要的价格管理工具，2009 年时这套机制远不成熟。"},
+    {zh:"准班率",en:"Schedule reliability",def:"按公布船期准时抵港的航次占比。它衡量服务质量，也间接决定货主要备多少安全库存——那是压在货主账上的资金成本。"},
+    {zh:"EBITDA",en:"Earnings before interest, taxes, depreciation and amortisation",def:"息税折旧摊销前利润，衡量主营业务的现金创造能力。航运是重资产行业，折旧巨大，业内更看 EBITDA 而不是净利润。"}
+  ],
+  sources:[
+    {d:"2026-09-02",n:"Strait of Hormuz Live Tracker（第 185 天）",u:"https://straits.live/",note:"通行量 6/85 艘、布伦特 94.41 美元、战争险约为常态 40 倍、预测市场重开概率"},
+    {d:"2026-09-01",n:"HNGN — Twin Supertanker Strikes Shatter Hormuz Corridor",u:"https://www.hngn.com/articles/273032/20260902/twin-supertanker-strikes-shatter-hormuz-corridor-brent-surges-past-95.htm",note:"8 月 31 日 Sidr 与 Senegal Prosperity 遇袭、布伦特涨约 5%、当日通行 5 艘"},
+    {d:"2026-09-01",n:"OilPrice — Two Supertankers Hit by Unknown Projectiles",u:"https://oilprice.com/Latest-Energy-News/World-News/Two-Supertankers-Hit-by-Unknown-Projectiles-in-Strait-of-Hormuz.html",note:"UKMTO 通报、船东与船旗、无伤亡无泄漏"},
+    {d:"2026-08-27",n:"Daily Cargo News — Drewry World Container Index, 27 August 2026",u:"https://www.thedcn.com.au/news/world-container-index-27-august-2026",note:"WCI 4,473 美元/FEU、环比 −1%、上海—纽约 9,333 美元"},
+    {d:"2026-07-03",n:"IndexBox — Container Freight Rates Surge to Highest Since 2022 Peak",u:"https://www.indexbox.io/blog/container-freight-rates-surge-to-highest-levels-since-2022-pandemic-peak/",note:"WCI 4,530 美元、TEU-mile 需求 +7.3% 对运力 +5.4%"},
+    {d:"2026-05-07",n:"gCaptain — Container Spot Rates Snap Back Amid Hormuz Tensions",u:"https://gcaptain.com/container-spot-rates-snap-back-as-carriers-push-emergency-surcharges-amid-hormuz-tensions/",note:"WCI 2,286 美元、MSC 与 CMA CGM 附加费、停航压减运力"},
+    {d:"2026-06-09",n:"Splash247 — Containership Orderbook Marches Toward 40% of Fleet",u:"https://splash247.com/containership-orderbook-marches-toward-40-of-fleet/",note:"39%、1,630 艘、1,328 万 TEU"},
+    {d:"2026-06-11",n:"Kuehne+Nagel — Orderbook Set to Breach 40% as Smaller Chinese Yards Ride the Wave",u:"https://mykn.kuehne-nagel.com/news/article/containership-orderbook-set-to-breach-40-as",note:"中国二线船厂占在手订单艘数约 25%、2028 年交付 540 万 TEU"},
+    {d:"2026-01-23",n:"CLECAT — Container Market Outlook（引 Drewry）",u:"https://www.clecat.org/news/newsletters/container-market-outlook-highlights-challenging-pe",note:"2026 年箱量 +1.8%、运价预计 −17%、「暴风雨前的平静」、2027–2029 运力 +6%–9%"},
+    {d:"2026-08-13",n:"Business Standard — Maersk Raises 2026 Outlook Again as Q2 Profit Surges to $3bn",u:"https://www.business-standard.com/world-news/maersk-raises-2026-outlook-again-as-q2-profit-surges-to-3-billion-126081301667_1.html",note:"二季度 EBITDA 30 亿美元、全年指引年内第二次上调"},
+    {d:"2026-08",n:"MarineLink — Despite $600m Middle East Hit, Hapag-Lloyd Q2 Results are Strong",u:"https://www.marinelink.com/news/despite-m-middle-east-hit-hapaglloyd-q-542089",note:"营收 58.4 亿、集团净利 0.83 亿、中东增量成本约 6 亿美元"},
+    {d:"2026-08",n:"Container News — Global Schedule Reliability Falls to 56.4% in July",u:"https://container-news.com/global-schedule-reliability-falls-to-56-4-in-july/",note:"环比 −6.1pp、同比 −8.8pp、平均延误 6.06 天"},
+    {d:"2026-08",n:"Splash247 — Hormuz Shock Sends Jebel Ali Tumbling Out of Global Top 30",u:"https://splash247.com/hormuz-shock-sends-jebel-ali-tumbling-out-of-global-top-30/",note:"上半年 314 万 TEU（去年 777 万）、排名 10 → 32；宁波舟山 2,290 万超新加坡 2,270 万"},
+    {d:"2026-03-03",n:"Al Jazeera — Maritime Insurers Cancel War Risk Cover in Gulf",u:"https://www.aljazeera.com/economy/2026/3/3/maritime-insurers-cancel-war-risk-cover-in-gulf-will-it-spike-energy-cost",note:"保费 0.2–0.25% → 1%；五家保赔协会 3 月 5 日起停保"},
+    {d:"2026-06-17",n:"Islamabad Memorandum",u:"https://en.wikipedia.org/wiki/Islamabad_Memorandum",note:"美伊框架协议；伊朗承诺商船安全通行且 60 天内免费"},
+    {d:"2025-08-19",n:"Seatrade Maritime — Container Shipping Faces a Decade of Overcapacity（Linerlytica）",u:"https://www.seatrade-maritime.com/containers/container-shipping-faces-a-decade-of-overcapacity",note:"2004–2009 年那轮订单潮与十年运力过剩的类比"},
+    {d:"2020",n:"Maritime Economics &amp; Logistics — Disruptions and Resilience in Global Container Shipping",u:"https://link.springer.com/article/10.1057/s41278-020-00180-5",note:"2009 年 TEU-mile −12.4%、闲置船队 10.4%→12%、行业亏损逾 200 亿美元、订单取消 6.7%"},
+    {d:"背景",n:"UNCTAD — Review of Maritime Transport",u:"https://unctad.org/topic/transport-and-trade-logistics/review-of-maritime-transport",note:"「全球商品贸易量八成以上由海运承担」的长期口径"}
+  ]
+},
 {
   id:"002", date:"2026-08-30", sector:"材料与电池", title:"锂的新买家", minutes:15,
   deck:'过去 12 个月，锂价涨了 <b>87%</b>。同一段时间里，中国的新能源汽车上半年<b>少卖了 13%</b>。8 月 27 日，一家评级机构旗下的研究部门一边上调锂价预测，一边写道：这轮上涨“已经超出了单靠基本面所能证明的范围”。',
@@ -563,6 +739,28 @@ const ISSUES = [
 /* 水平参照：雅思 7.5（听 8 / 说 6.5 / 读 8.5 / 写 6.5），NTU 大三。
    重点补听说：高频口语、连读、以及中文母语者最容易踩的表达坑。 */
 const ENGLISH = [
+{ date:"2026-09-03", items:[
+  { type:"固定搭配", en:"raise a concern / flag something up", zh:"「提出一个顾虑」的地道说法是 raise，不是 propose。意思你表达得出来，但动词几乎总是配错——这是一开口就暴露的中式英语。",
+    use:"<b>①</b> <b>raise</b> a concern / an issue / a point —— 在讨论、会议、tutorial 上正式提出；<b>②</b> <b>flag</b> something <b>up</b> —— 更轻、更口语的「先提个醒」，邮件和群聊里高频；<b>③</b> <b>bring</b> something <b>up</b> —— 最中性的「说起、提到」，适合插话进一个已经在进行的话题。",
+    ex:[["I don't want to derail the meeting, but can I raise a concern about the timeline?","我不想打断会议，不过时间安排上我想提一个顾虑。"],
+        ["A: Anything else before we submit?  B: Just flagging up that section 3 still has no citations.","A：交之前还有别的吗？B：就提个醒，第三部分还没加引用。"]],
+    bad:"中国学生几乎一定会说 <b>propose a concern</b> ×，或者 <b>put forward a concern</b> ×。错在哪：propose 的宾语是「方案、提议」这类<b>你希望被采纳</b>的东西，而 concern 是你希望被<b>消除</b>的东西——搭配在逻辑上就是反的，母语者听着别扭。put forward 则太正式，用在口头讨论里像在念公文。记住动词就行：concern 配 <b>raise</b>。",
+    say:"raise 的词尾 s 浊化成 /z/ 并和 a 连读：<code>raise a</code> → “RAY-zuh”，两个词粘成一块。flag it up 里 g 和 i 连读、t 变成一个极快的闪音：<code>flag it up</code> → “fla-gi-DUP”。听力里这两块常常一闪而过，认得音块就不会漏。"},
+
+  { type:"话语标记", en:"Then again, …", zh:"说完一句话之后自己把它往回拉一点：「不过话说回来……」。关键在于——它标记的是<b>你对自己</b>的反驳，不是对别人的。",
+    use:"<b>①</b> 讲完一个判断，马上补一个削弱它的理由；<b>②</b> 犹豫时把两边都摆出来，显得你在真思考，而不是随口下结论；<b>③</b> 承认对方可能有道理，但不完全让步。",
+    ex:[["That module looks brutal. Then again, everyone said that about CZ2003 and it turned out fine.","那门课看着很难。不过话说回来，当初大家也这么说 CZ2003，结果还好。"],
+        ["A: You should just take the internship.  B: Yeah… then again, it's four months unpaid.","A：那个实习你就接了吧。B：嗯……不过话说回来，那是四个月无薪。"]],
+    bad:"中国学生在这个位置几乎只会用 <b>But</b> 或 <b>However</b>。它们本身没错，但都是「反驳<b>别人</b>」的词；而这里你反驳的是<b>你自己刚说完的那句话</b>。用 But 容易让人以为你在跟对方抬杠，用 However 又太书面，口语里显得端着。then again 精确地标记了「我改变了自己的想法」这个动作——这恰恰是中国学生几乎从不产出的一层意思。",
+    say:"三个音节连成一块，第一个 then 弱读到几乎只剩 /ðən/，n 和 a 连读，重音全落在最后：<code>then again</code> → “thə-nə-GEN”。它前面通常有一个明显的停顿，或者一声拖长的 “yeah…”——听到那个停顿，就知道对方要自我修正了。"},
+
+  { type:"句式语法", en:"…, only to + 动词原形", zh:"「结果却……」。用来收尾一件白忙一场或事与愿违的事，自带一点无奈和反讽。一看就懂，但中国学生基本不会主动用。",
+    use:"<b>①</b> 前半句是付出的努力，only to 后面接一个泼冷水的结果；<b>②</b> 时间上必须是<b>紧接着</b>发生的意外，不能是很久以后；<b>③</b> only to 后面永远跟动词原形，主语不重复——这正是它比 but 更利落的地方。",
+    ex:[["I queued forty minutes for the printer, only to find the deadline had been pushed back a week.","我为了打印排了四十分钟队，结果发现截止日期往后推了一周。"],
+        ["She flew back to Chengdu for the interview, only to be told the role had been filled internally.","她专程飞回成都面试，结果被告知职位已经内部消化了。"]],
+    bad:"中国学生会写成 <b>but finally I found that…</b> × 或 <b>but at last…</b> ×。两个问题：finally / at last 表示「终于（等到了好结果）」，情感色彩是<b>正面</b>的，用在这里意思正好拧了；而且拆成两个完整分句之后，那种「白忙一场」的落差感就散掉了。only to 把整个反差压缩进一个短语，这是它不可替代的地方。",
+    say:"only 的 y 和 to 连读，to 弱读成 /tə/：<code>only to</code> → “OHN-lee-tə”，整块很快带过，重音全落到后面的动词上。书面上 only to 前面那个逗号，在口语里就是一个短停顿——听到「停顿 + OHN-lee-tə」，后面必然是坏消息。"}
+]},
 { date:"2026-08-30", items:[
   { type:"话语标记", en:"If anything, …", zh:"用来推翻刚说完的预期——“要说有什么变化，反而是……”。中文里没有对应的单个词，所以中国学生几乎从不主动说。",
     use:"<b>①</b> 否掉一个说法后，指出真实情况是<b>反方向</b>的；<b>②</b> 对方猜错了方向，你温和地纠正；<b>③</b> 自嘲式地加强一个否定。",
@@ -586,6 +784,9 @@ const ENGLISH = [
     say:"英式里 th 弱化、r 不发音、t 吞掉：<code>can't be bothered</code> → “carn-be-BOV-vəd”。整块听起来没有单词边界，认得这个音块在听力里很省力。"}
 ]}
 ];
+
+/* 当前内容版本；与 version.json 比对来发现新一期 */
+const BUILD = "2026-09-03";
 
 /* ═══════════ 存储 ═══════════ */
 const KEY="dib.v1";
@@ -749,7 +950,8 @@ function renderMe(){
         <span class="chip">${i.sector}</span></span></span><span></span></button>`).join("")
       :`<div class="empty">还没有收藏。阅读时点右上角的 ★</div>`}
     <div class="monthlbl">关于</div>
-    <div class="set"><span class="k">每天一期，早上更新</span><span class="v">v1.0</span></div>
+    <button class="set" id="btnUpd"><span class="k">检查更新</span><span class="v">内容版本 ${BUILD}</span></button>
+    <div class="set"><span class="k">每天一期，早上 8 点自动更新</span><span class="v">v1.2</span></div>
     <div class="set"><span class="k">正文标注「我的粗算 / 解读 / 换算」的是作者推断</span></div>
     <div class="set"><span class="k">其余内容均标注可点击核对的来源</span></div>`;
 }
@@ -759,6 +961,10 @@ let cur=null;
 function blockHTML(b){
   switch(b.t){
     case "p": return `<p>${inl(b.v)}</p>`;
+    case "flow": return `<p class="flowline">${b.v.map((x,j)=>
+      (j?'<span class="ar">\u2192</span>':'')+inl(x)).join("")}</p>`;
+    case "chain": return `<ul class="chain">${b.items.map(([k,v])=>
+      `<li><b class="k">${k}</b>${inl(v)}</li>`).join("")}</ul>`;
     case "h4": return `<h4>${inl(b.v)}</h4>`;
     case "ul": return `<ul>${b.v.map(x=>`<li>${inl(x)}</li>`).join("")}</ul>`;
     case "ol": return `<ol>${b.v.map(x=>`<li>${inl(x)}</li>`).join("")}</ol>`;
@@ -770,7 +976,7 @@ function blockHTML(b){
     case "table": return `<div class="tbl"><table><caption>${b.cap} <span style="opacity:.65">· 左右滑动看完整</span></caption>
       <thead><tr>${b.head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${
       b.rows.map(r=>`<tr>${r.map(c=>Array.isArray(c)
-        ?`<td class="${c[0]}">${c[1]}</td>`:`<td>${inl(c)}</td>`).join("")}</tr>`).join("")
+        ?`<td class="${c[0]}">${inl(c[1])}</td>`:`<td>${inl(c)}</td>`).join("")}</tr>`).join("")
       }</tbody></table></div>`;
     default: return "";
   }
@@ -788,7 +994,7 @@ function openIssue(id){
   }else{
     body+=i.sections.map(s=>`<section class="sec">
       <div class="sechd"><span class="n">${s.n}</span><span class="t">${s.tag}</span></div>
-      <h3>${s.h}</h3>${s.blocks.map(blockHTML).join("")}</section>`).join("");
+      <h3>${s.h}</h3>${s.q?`<p class="secq"><b>本节回答</b>${inl(s.q)}</p>`:""}${s.blocks.map(blockHTML).join("")}</section>`).join("");
     body+=`<section class="sec"><div class="sechd"><span class="n">§</span><span class="t">本期术语</span></div>
       <h3>${i.terms.length} 条，点开可收藏</h3>${
       i.terms.map(t=>`<button class="gitem" style="padding-left:0;padding-right:0" data-term="${t.zh}">
@@ -872,6 +1078,7 @@ document.addEventListener("click",e=>{
   const se=t.closest("[data-stareng]");
   if(se){const k=se.dataset.stareng;S.starEng[k]=!S.starEng[k];save();renderEng();renderMe();return}
 
+  if(t.closest("#btnUpd")){hardReload();return}
   if(t.closest("#veil")||t.closest("#sClose")){closeSheet();return}
   if(t.closest("#rClose")){closeReader();return}
   if(t.closest("#rStar")&&cur){S.star[cur.id]=!S.star[cur.id];save();
@@ -898,6 +1105,45 @@ function switchTab(name){
 }
 
 renderToday(); renderArch(); renderEng(); renderMe();
+
+/* ═══════════ 自动更新 ═══════════
+   手机主屏幕 App 从后台切回来时，会向 version.json 问一句「有没有新一期」。
+   有 → 没在读文章就静默刷新，在读文章就顶部弹一条，不打断阅读。 */
+function hardReload(){
+  const go=()=>location.replace(location.pathname);
+  if(window.caches){
+    caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(go,go);
+  }else go();
+}
+let updShown=false;
+function showUpdBar(){
+  if(updShown)return; updShown=true;
+  const el=document.getElementById("updbar"); if(el) el.hidden=false;
+}
+async function checkUpdate(){
+  try{
+    if(navigator.serviceWorker){
+      const reg=await navigator.serviceWorker.getRegistration();
+      if(reg) reg.update().catch(function(){});
+    }
+    const r=await fetch("./version.json?_="+Date.now(),{cache:"no-store"});
+    if(!r.ok) return;
+    const v=await r.json();
+    if(!v||!v.build||v.build===BUILD) return;
+    /* 同一个版本一次会话只自动刷新一次，避免 CDN 延迟造成反复重载 */
+    const k="dib.upd."+v.build;
+    let tried=false; try{tried=!!sessionStorage.getItem(k)}catch(e){}
+    const reading=document.getElementById("reader").classList.contains("on");
+    if(tried||reading){ showUpdBar(); return; }
+    try{sessionStorage.setItem(k,"1")}catch(e){}
+    hardReload();
+  }catch(e){}
+}
+document.addEventListener("visibilitychange",function(){ if(!document.hidden) checkUpdate(); });
+window.addEventListener("pageshow",function(e){ if(e.persisted) checkUpdate(); });
+window.addEventListener("focus",checkUpdate);
+setInterval(checkUpdate,30*60*1000);
+checkUpdate();
 
 /* 离线支持 */
 if ('serviceWorker' in navigator) {

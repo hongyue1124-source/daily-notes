@@ -6,7 +6,7 @@
 
 ## 未解决
 
-### 1. GitHub 推送凭据没打通（阻塞项，优先级最高）
+### 1. GitHub 推送凭据 —— **2026-09-06 已解决**（保留记录）
 
 **症状**：环境里有 `GH_TOKEN` / `GITHUB_TOKEN`，但值是字符串
 `builtin injection failed (github)`，不是真 token。`curl` 打 API 返回空。
@@ -70,6 +70,31 @@ git -C "/Users/panpan/Downloads/Claude Code/每日知识/daily-notes" push
 
 **做完之后每天就是全自动的**：定时任务跑在这台 Mac 上（不是云端容器），
 用的就是这个本地仓库和这套本地凭据，`git push` 会直接成功，不用每天手动推。
+
+---
+
+#### 结局：2026-09-06 打通了
+
+用户在自己的 Mac 上跑了这三步（**Claude 全程做不了**：本会话的权限分类器拦掉了
+`kill`、`gh auth login` 等一切认证相关命令；设备流最后的浏览器 Authorize 也必须本人点）：
+
+```bash
+gh auth login --hostname github.com --git-protocol https --web
+gh auth setup-git
+git -C "/Users/panpan/Downloads/Claude Code/每日知识/daily-notes" push
+```
+
+`--hostname` + `--git-protocol` 这两个参数把交互菜单的前几问全跳过了，
+用户只需要复制一次性验证码、在浏览器点一下 Authorize。**这是给非技术用户的最短路径，以后照抄。**
+
+结果：`53b0b79..164a3ea main -> main`，积压的 5 个提交一次推完，
+GitHub Pages 已重新发布，线上 `version.json` = 005 绕行红利。
+
+**从此每天全自动**：定时任务跑在用户这台 Mac 上（不是云端容器），
+用的就是本地仓库 + `gh` 装好的 osxkeychain 凭据，`git push` 会直接成功。
+凭据由 `gh` 管理，不会再过期成旧密码那种状态。
+
+**如果哪天又推不动**，先跑 `gh auth status` 看登录还在不在，再按上面三步重来一次。
 
 ---
 

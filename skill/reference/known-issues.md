@@ -33,6 +33,46 @@ curl -s -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/user | head 
 
 ---
 
+#### 补充：本机（用户 Mac）凭据实测结果 —— 2026-09-06
+
+在用户自己的 Mac 上直接跑 `git push`，**同样推不动**，而且原因和云端那条不一样：
+
+```
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/hongyue1124-source/daily-notes.git/'
+```
+
+逐项查证：
+
+| 路径 | 状态 |
+|---|---|
+| `credential.helper` | `osxkeychain`，里面**有** `github.com` 的条目，用户名 `hongyue1124-source` |
+| 钥匙串里那个密码 | GitHub 拒收 —— 是旧的账号密码，不是 token（GitHub 2021-08 已停用密码认证）。**这条已被 git 自动清除**，现在 push 会变成 `could not read Username`，即「完全没有凭据」 |
+| SSH | `ssh -T git@github.com` → `Permission denied (publickey)`，没有可用公钥 |
+| `gh` CLI | 未安装（`command not found`） |
+
+**结论：这不是「没登录」，是「登录信息过期」。** `先看我.md` 里写的
+"你的 Mac 上应该已经登录过 GitHub，直接推就行"是**错的**，别照着做。
+
+**这一步必须用户本人做一次**（Claude 不被允许代为输入 token / 密码）：
+
+```bash
+# 方案 A（推荐，token 不进聊天记录）
+brew install gh && gh auth login          # 选 GitHub.com → HTTPS → 浏览器登录
+
+# 方案 B：自己签发 fine-grained PAT（仓库限 daily-notes，Contents: Read and write）
+# 那条过期凭据已被 git 在失败的 push 里自动清除，无需再 erase；
+# 直接在 push 的交互提示里 Username 填 hongyue1124-source、Password 粘贴 PAT，钥匙串会记住
+
+# 两种方案都做完后，一次性把积压提交推上去
+git -C "/Users/panpan/Downloads/Claude Code/每日知识/daily-notes" push
+```
+
+**做完之后每天就是全自动的**：定时任务跑在这台 Mac 上（不是云端容器），
+用的就是这个本地仓库和这套本地凭据，`git push` 会直接成功，不用每天手动推。
+
+---
+
 ### 2. artifact publish 需要用户手动确认
 
 **症状**：定时任务跑完，Artifact 发布卡在等用户点确认。用户不在就一直挂着。

@@ -179,6 +179,9 @@ clone 到的 `index.html` 里只有 001、002，它据此把当期编成了 **00
 **注意**：`[data-open="006"]` 在今日页和往期页各有一个，直接 `page.click('[data-open="006"]')`
 会命中今日页那个隐藏按钮然后超时。选择器要写成 `#archBody [data-open="006"]`。
 
+**「读书」页已经有一份常驻的**：`node skill/scripts/verify_books.mjs`（75 项，和 verify.mjs 互不覆盖）。
+动了 BOOKS / 阅读器 / 存储键就跑它。它连老 localStorage（缺 `readBook`/`starBook`）都会构造一次。
+
 ---
 
 ### 6. `[[术语]]` 引用检查会被表格里的嵌套数组误报 —— 2026-09-06
@@ -204,6 +207,71 @@ clone 到的 `index.html` 里只有 001、002，它据此把当期编成了 **00
    退回列表后那一行的 ★ 还是旧的
 
 存储键 `S.starEng` 的 key 仍是 `engKey(i) = date+"|"+en`，**任何时候都别动它**，动了用户已有收藏全丢。
+
+---
+
+### 8. 内容改了但期号没变时，**不能**动 BUILD —— 2026-09-06
+
+加「读书」页时想按惯例把 `index.html` / `sw.js` / `version.json` 的 BUILD 往前推一格，
+结果 `verify.mjs` 直接红：它硬断言
+
+```js
+check('BUILD 与最新一期日期一致',   meta.build === meta.top.date);
+check('version.json 与最新一期一致', ver.build === meta.top.date && ver.issue === meta.top.id);
+```
+
+也就是说 **BUILD 恒等于 `ISSUES[0].date`**。这类「内容变了但没有新一期」的改动，
+BUILD、`version.json` 的 `build` / `issue` / `title` / `sector` 一个都不能碰。
+
+**这反而正好是对的**：`checkUpdate()` 只在 `v.build !== BUILD` 时才弹
+「有新一期 · 点这里更新」，BUILD 不动 → 那条横幅不会误报。
+而手机端照样拿得到新页面，因为 `sw.js` 对 `req.mode === 'navigate'` 是**网络优先**的。
+
+**缓存版本号要推的话，另开一个常量**：
+
+```js
+const BUILD = '2026-09-06';   // ← 这一行的格式被 insert_issue.py 的正则锁死，别加非数字字符
+const REV   = 'r2';           // ← 同一天内容又改了就推这个
+const CACHE = 'dib-' + BUILD + '-' + REV;
+```
+
+`insert_issue.py` 用 `re.subn(r"const BUILD = '[\d-]*';", …)` 改 sw.js，
+BUILD 里混进字母，**第二天的定时任务会直接 die 在「sw.js 里找不到 const BUILD」**。
+改 REV 就够了：sw.js 字节变了 → 手机端重新 install → activate 里旧缓存被清掉。
+
+---
+
+### 9. `#reader` 复用到第三种内容（书 / 章两层）时补的坑 —— 2026-09-06
+
+第 7 条讲的是英语复用阅读器。读书页是**两层**，比英语多三件事：
+
+1. **`cur` / `curEng` / `curBook` 三者互斥，`curChap` 只在 `curBook` 非空时出现**。
+   `#rStar` 的分支顺序必须是 **章 → 书 → 英语 → 文章**：`curChap` 非空时 `curBook` 也非空，
+   先判书就会把「收藏这一章」写成「收藏整本」。
+2. **`#rClose` 不再等于 `closeReader()`**。在章节里点 ✕ 要
+   `curChap=null; openBook(bid, true)` 退回那本书（`true` = 恢复进章节前记下的 `bookScrollY`），
+   只有在书页 / 文章 / 英语上才真的关阅读器。用户明确要过这个行为。
+3. **`updProg()` 的新分支要写在 `if(!cur) return` 之前**。第 7 条说过别把那行改成
+   `if(!cur&&!curEng)`；正确做法是在它上面加一个 `if(curChap){ … return }`，
+   里面写的是 `S.readBook`，和文章的 `S.read` 完全分开。
+   书页（`curBook` 且无 `curChap`）就让它落到 `if(!cur) return`，`#rProg` 保持 openBook 里设的
+   「读了几章」百分比。
+
+另外 `closeReader()` 要清 `curBook` / `curChap` 并补一次 `renderBooks()`，
+否则在阅读器里点的收藏，退回书列表那一行还是旧的（和第 7 条第 4 点同因）。
+
+**属性名不要撞**：事件委托用的是 `t.closest("[data-open]")`，属性选择器是精确匹配，
+所以 `data-openbook` / `data-openchap` 不会被 `[data-open]` 命中。
+反过来说，以后新加的属性**别叫 `data-open`**，否则会被当成期号丢进 `openIssue()`。
+
+---
+
+### 10. `.row .sub` 自带两行截断 —— 2026-09-06
+
+`.row .sub` 是英语「往期」那份样式带来的，写死了 `-webkit-line-clamp:2`。
+书列表复用 `.row` 时，副标题长一点的（《道德经》那句）会被截成两行加省略号。
+按页覆盖一下就行：`#bookBody .row .sub{-webkit-line-clamp:3}`。
+**任何复用 `.row` 的新列表都要先看一眼这条。**
 
 ---
 

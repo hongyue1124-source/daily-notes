@@ -1,9 +1,10 @@
 # 数据格式
 
-`index.html` 里有两个数组，App 的全部内容都来自它们：
+`index.html` 里有三个数组，App 的全部内容都来自它们：
 
 - `const ISSUES = [ … ]` —— 每期一个对象，**最新的排最前**
 - `const ENGLISH = [ … ]` —— 每天一个对象，**最新的排最前**
+- `const BOOKS = [ … ]` —— 每本读书笔记一个对象（见文末），**不随每日任务变动**
 
 写入用 `skill/scripts/insert_issue.py`，它用 `json.dumps` 生成 JS
 （JSON 是 JS 对象字面量的子集），引号全部自动转义，**从根上避免引号事故**。
@@ -143,3 +144,82 @@
 ```
 
 三条的选材标准、禁用清单、去重要求见 `SKILL.md` 第 3 节。
+
+
+---
+
+## BOOKS 的一本书（2026-09-06 新增）
+
+「读书」页的数据。**每日任务不碰它**；只有往 App 里加新书时才改。
+和 ISSUES 共用 `blockHTML()` 的全部块类型和 `[[术语]]` 气泡机制。
+
+```jsonc
+{
+  "id": "daodejing",              // 英文短 id，同时是 S.readBook / S.starBook 的键前缀
+  "title": "道德经",
+  "author": "老子",
+  "sub": "一句话副标题",            // 书列表那一行的第二行文字
+  "eyebrow": "LAOZI · DAO DE JING · 精读笔记",
+  "meta": ["结构：八十一章", "体裁：韵文与格言"],   // 阅读器页眉的小方块
+  "unit": "组",                    // 章节单位：章 / 卷 / 篇 / 组，界面文案里到处用
+  "chapTitle": "八十一章分九组精读",
+  "front":    [ /* 上半部，进书就完整展开 */ ],
+  "chapters": [ /* 下半部，折叠成行，点开是第二层阅读器 */ ],
+  "tail":     [ /* 可选，排在章节列表之后的附录，如「八十一章关键词索引」 */ ],
+  "terms":    [ { "zh": "道", "en": "关键章 1, 4, 25", "def": "…　常见误读：…" } ],
+  "sources":  [ { "n": "标题", "u": "https://…", "note": "这条用来支撑什么" } ]
+}
+```
+
+### front / tail 的一节
+
+和 ISSUES 的 `section` 同形，只多一个 `qlbl`：
+
+```jsonc
+{ "n": "§1", "tag": "一页读懂", "h": "一页读懂《道德经》",
+  "q": "可选，渲染成绿色问题框", "qlbl": "可选，问题框的标签，默认「本节回答」",
+  "blocks": [ /* 和 ISSUES 完全一样的块 */ ] }
+```
+
+### chapters 的一条
+
+```jsonc
+{ "no": "01",                 // 两位数字；和 id 拼成存储键 `bookId|no`，**定了就别改**
+  "rng": "第 1—9 章",          // 折叠行上的灰色小字，可空
+  "h": "第一组：命名、对立与水",
+  "tags": ["道与名", "有无相生"],   // 折叠行只显示前两个
+  "q": "本卷主问题…", "qlbl": "本卷主问题",   // 可选
+  "blocks": [ … ] }
+```
+
+### 源笔记 → 块类型的对应
+
+三本书是从 `/Users/panpan/Downloads/读书笔记/*.html` 抽出来的（**那个目录只读**），
+抽取脚本按下表映射，加新书时照抄这张表，**不要把语义压平成一堆 `p`**：
+
+| 源笔记里的东西 | 映射到 |
+|---|---|
+| `p.big` / `p.big-answer`（核心答案） | `takeaway`，`lbl` 写「核心答案」 |
+| `blockquote` + `footer` | `takeaway`，`lbl` 用 footer 的出处 |
+| `div.logic`（`strong` + 说明的推理链） | `chain` |
+| `div.question`（现实练习） | `watch`，`["01","题目","说明"]` |
+| `div.grid*` 里的 `article.card` | `h4` + `p` 成对；标题带 `!` 的收进 `risk` |
+| `table` / `div.regimes` / `div.index` | `table` |
+| `p.muted`（旁注） | `p`，前面加 `<span class="flag">标签</span>` |
+| `ul` / `ol` | 原样，`li` 里的 `<strong>` 保留 |
+
+### 存储键（**绝不能和文章 / 英语混用**）
+
+| store | 键 | 含义 |
+|---|---|---|
+| `S.readBook` | `bookId + "|" + ch.no` | 这一章读完了 |
+| `S.starBook` | `bookId` 或 `bookId + "|" + ch.no` | 收藏整本 / 收藏某一章 |
+
+`S.read` / `S.star` / `S.starEng` 是文章和英语的，**动了会把用户已有的收藏和进度串味**。
+`S` 的初始结构里已经给 `readBook` / `starBook` 写了默认 `{}`，
+后面还有一行把六个 store 逐个兜底成对象——老用户的 localStorage 里没有这两个字段，靠的就是这两处。
+
+### 书里的概念也进全局术语表
+
+`termMap()` 先塞 `ISSUES` 的 `terms`，再塞 `BOOKS` 的，**同名时期刊的定义优先**（不改动已有气泡）。
+书里的术语对象带 `bk` / `bkTitle` 而不是 `iss`，`openTerm()` 靠 `t.iss` 是否存在来决定来源那行怎么写。

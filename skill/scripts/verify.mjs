@@ -15,21 +15,50 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 /* playwright 通常是全局装的，ESM 从仓库目录解析不到，用 CommonJS 解析绕开。
-   没装就装一次（PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1，浏览器已在 /opt/pw-browsers）。 */
+   两个运行环境要都能跑：
+     · 云端容器 —— playwright 全局装，浏览器在 /opt/pw-browsers/chromium
+     · 用户的 Mac —— 没有全局 playwright（npm 走的代理还是死的），但 npx 缓存里有一份，
+                     浏览器用系统装的 Google Chrome
+   所以模块和浏览器都按候选列表逐个试，全找不到才装，装不上才退出。 */
 const require_ = createRequire(import.meta.url);
+
+const moduleCandidates = () => {
+  const out = [];
+  try { out.push(path.join(execSync('npm root -g', { encoding: 'utf8' }).trim(), 'playwright')); } catch {}
+  out.push('playwright');
+  try {
+    const npx = path.join(process.env.HOME || '', '.npm/_npx');
+    for (const d of fs.readdirSync(npx)) {
+      const p = path.join(npx, d, 'node_modules/playwright');
+      if (fs.existsSync(p)) out.push(p);
+    }
+  } catch {}
+  return out;
+};
+
 let chromium;
 for (const attempt of [0, 1]) {
+  for (const m of moduleCandidates()) {
+    try { chromium = require_(m).chromium; break; } catch {}
+  }
+  if (chromium) break;
+  if (attempt) { console.error('✗ 装不上 playwright，跳过手机视口验证'); process.exit(1); }
+  console.log('安装 playwright…');
   try {
-    const g = execSync('npm root -g', { encoding: 'utf8' }).trim();
-    chromium = require_(path.join(g, 'playwright')).chromium;
-    break;
-  } catch {
-    try { chromium = require_('playwright').chromium; break; } catch {}
-    if (attempt) { console.error('✗ 装不上 playwright，跳过手机视口验证'); process.exit(1); }
-    console.log('安装 playwright…');
     execSync('PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g playwright', { stdio: 'inherit' });
+  } catch {
+    console.error('✗ npm install 失败（本机 npm 代理不通？），也没找到任何一份 playwright');
+    process.exit(1);
   }
 }
+
+/* 浏览器可执行文件：容器路径 → Mac 上的 Chrome → 交给 playwright 自己找 */
+const BROWSER = [
+  '/opt/pw-browsers/chromium',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/Applications/Chromium.app/Contents/MacOS/Chromium',
+].find(p => fs.existsSync(p));
+const LAUNCH = BROWSER ? { executablePath: BROWSER } : {};
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PORT = 8899;
@@ -56,7 +85,7 @@ const check = (name, ok, extra = '') => {
 
 await new Promise(r => server.listen(PORT, '127.0.0.1', r));
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+const browser = await chromium.launch(LAUNCH);
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'allow' });
 const page = await ctx.newPage();
 const errs = [];

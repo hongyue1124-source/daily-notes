@@ -1,6 +1,6 @@
 /* 每日行业笔记 · Service Worker
    每次内容更新时，把下面的 BUILD 改成当天日期，旧缓存会被自动清掉。 */
-const BUILD = '2026-09-03';
+const BUILD = '2026-09-06';
 const CACHE = 'dib-' + BUILD;
 const SHELL = [
   './', './index.html', './manifest.webmanifest',

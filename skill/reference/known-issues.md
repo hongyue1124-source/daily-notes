@@ -98,7 +98,33 @@ GitHub Pages 已重新发布，线上 `version.json` = 005 绕行红利。
 
 ---
 
-### 2. artifact publish 需要用户手动确认
+### 2. verify.mjs 在用户的 Mac 上跑不起来 —— **2026-09-06 已修**
+
+**症状**：在用户 Mac 上跑 `node skill/scripts/verify.mjs`，先报
+`ECONNREFUSED 127.0.0.1:7897`（npm 想装 playwright），再整个崩掉。
+
+**根因是两条硬编码的云端假设**，Mac 上都不成立：
+
+| 假设 | Mac 上的实际情况 |
+|---|---|
+| playwright 全局装在 `npm root -g` | 没装。`npm install -g` 也走不通——本机 npm 配了代理 `127.0.0.1:7897`，那个代理是死的（`curl` 直连反而正常，所以别误判成"没网"） |
+| 浏览器在 `/opt/pw-browsers/chromium` | 这个目录不存在。但 `/Applications/Google Chrome.app` 装着，playwright 可以直接驱动它 |
+
+**已做的修复**（`verify.mjs` 顶部）：模块和浏览器都改成按候选列表逐个试。
+
+- 模块：`npm root -g` → 裸 `require('playwright')` → **遍历 `~/.npm/_npx/*/node_modules/playwright`**
+  （Mac 上就是靠最后这条命中的，npx 缓存里有一份 1.60）
+- 浏览器：`/opt/pw-browsers/chromium` → Mac 的 Google Chrome → Chromium.app → 都没有就把
+  `executablePath` 整个省掉，交给 playwright 自己找
+
+两个环境现在都能跑，云端那条路径没有被破坏。
+
+**如果哪天又崩了**：先 `node -e "require('playwright')"` 确认模块能不能加载，
+再 `ls /Applications/Google\ Chrome.app` 确认浏览器在不在。不要去修 npm 代理——不需要联网。
+
+---
+
+### 3. artifact publish 需要用户手动确认
 
 **症状**：定时任务跑完，Artifact 发布卡在等用户点确认。用户不在就一直挂着。
 
@@ -109,7 +135,7 @@ GitHub Pages 已重新发布，线上 `version.json` = 005 绕行红利。
 
 ---
 
-### 3. 期号与内容重复事故（2026-09-03）—— 已修，但根因值得记住
+### 4. 期号与内容重复事故（2026-09-03）—— 已修，但根因值得记住
 
 **发生了什么**：9/1、9/2 两期（003 两条运河的拔河、004 填不满的地址栏）成功发布了
 独立网页版 artifact，但都**没能写进仓库**（推不动 GitHub）。于是 9/3 那次运行
@@ -176,9 +202,21 @@ JS 字符串被截断。**根治办法**：一律用 `insert_issue.py` 写入，
 
 ## 环境备忘
 
-- Chromium 在 `/opt/pw-browsers/chromium`，**不要跑 `playwright install`**
-- playwright 是全局装的，`.mjs` 里 ESM 解析不到，要用 `createRequire` + `npm root -g`
-- 容器是临时的：写进 `~/.claude/skills/` 的东西活不过这次会话，
-  **skill 的权威副本在仓库里**（`skill/`），每天 clone 就能读到
-- 定时任务会话**没有**用户电脑的访问权（无 `mcp__remote-devices__*`、无浏览器工具），
-  别指望能替他操作电脑
+**从 2026-09-06 起，每日任务跑在用户自己的 Mac 上**，不再是云端容器。两套环境的差别：
+
+| | 云端容器 | 用户的 Mac（现在的默认） |
+|---|---|---|
+| 仓库 | 每天 `git clone` | 本地已存在：`/Users/panpan/Downloads/Claude Code/每日知识/daily-notes`，**开工先 `git pull --rebase`，不要 clone** |
+| GitHub 推送 | 推不动（见第 1 条） | `gh` + osxkeychain 已打通，`git push` 直接成功 |
+| Chromium | `/opt/pw-browsers/chromium`，**不要跑 `playwright install`** | 没有这个目录；用系统的 Google Chrome |
+| playwright | 全局装 | 只有 `~/.npm/_npx/*/node_modules/playwright` 那份 |
+| npm 联网 | 正常 | `npm install` 走死代理 `127.0.0.1:7897`，装不了东西（`curl` 直连是通的） |
+
+`verify.mjs` 已经改成两套环境都能自动适配，见第 2 条。
+
+其余不变：
+
+- `.mjs` 里 ESM 解析不到全局包，要用 `createRequire`
+- **skill 的权威副本在仓库里**（`skill/`），不要依赖 `~/.claude/skills/` 里的副本
+- 定时任务会话没有替用户操作电脑的权限（认证类命令会被权限分类器拦掉），
+  `gh auth login` 这类必须用户本人跑

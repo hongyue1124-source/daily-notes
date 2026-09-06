@@ -75,9 +75,25 @@ def validate(iss, eng):
             errs.append('来源缺 d/n/u: %r' % s)
 
     # 正文里引用的 [[术语]] 必须在 terms 里存在
+    # 必须递归到每个字符串值再跑正则。早先是在整段 json.dumps(secs) 上跑的，
+    # 表格里的数组格（如 [['9,333','美元/FEU']]）序列化后会出现字面 [[，
+    # 被误判成术语引用，报一堆不存在的错。见 known-issues.md。
     names = {t.get('zh') for t in terms}
-    body = json.dumps(secs, ensure_ascii=False)
-    for ref in set(re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', body)):
+
+    def _walk_str(v):
+        if isinstance(v, str):
+            yield v
+        elif isinstance(v, dict):
+            for x in v.values():
+                yield from _walk_str(x)
+        elif isinstance(v, (list, tuple)):
+            for x in v:
+                yield from _walk_str(x)
+
+    refs = set()
+    for sv in _walk_str(secs):
+        refs.update(re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', sv))
+    for ref in sorted(refs):
         if ref not in names:
             errs.append('正文用了 [[%s]]，但术语表里没有这个词（气泡会点不开）' % ref)
 

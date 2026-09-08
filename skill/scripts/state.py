@@ -99,6 +99,23 @@ def main():
             'web': field(o, 'web') or field(o, 'external') or '',
         })
 
+    # 心理学实验：id 和 ISSUES 是两套编号，必须分开数。
+    # 老版本的 index.html 里没有 PSYCH，取不到就当成空板块，不要报错。
+    try:
+        psych_objs = top_objects(slice_array(src, 'const PSYCH = ['))
+    except ValueError:
+        psych_objs = []
+    psych = []
+    for o in psych_objs:
+        psych.append({
+            'id': field(o, 'id'), 'date': field(o, 'date'),
+            'field': field(o, 'field'), 'name': field(o, 'name'),
+            'en': field(o, 'en'), 'year': field(o, 'year'),
+        })
+    ps_ids = [int(r['id']) for r in psych if r['id'] and r['id'].isdigit()]
+    ps_nxt = '%03d' % ((max(ps_ids) + 1) if ps_ids else 1)
+    ps_recent = [r['field'] for r in psych[:2]]
+
     eng_days = top_objects(slice_array(src, 'const ENGLISH = ['))
     used_en, day_rows = [], []
     for d in eng_days:
@@ -114,9 +131,12 @@ def main():
 
     print('=' * 62)
     print('本期期号        : %s        ← 已有最大 id + 1，不要凭记忆改' % nxt)
+    print('心理实验编号    : %s        ← PSYCH 自己的一套编号，和期号无关' % ps_nxt)
     print('今天(SGT)       : %s' % today_sg())
     print('                  ↑ 若与系统提示 <env>Today\'s date 不一致，以系统提示为准')
     print('最近两期的行业  : %s   ← 避开这些' % ('、'.join(recent) if recent else '（无）'))
+    print('最近两条的分支  : %s   ← 心理学分支轮换，避开这些'
+          % ('、'.join(ps_recent) if ps_recent else '（无）'))
     print('=' * 62)
 
     print('\n【已有 %d 期】' % len(rows))
@@ -131,6 +151,21 @@ def main():
             seen.add(r['sector']); order.append(r['sector'])
     print('  ' + ('、'.join(order) if order else '（无）'))
 
+    print('\n【已用过的心理学实验 %d 条】不得重复选题' % len(psych))
+    if psych:
+        for r in psych:
+            print('  %s  %s  %-10s %s（%s）'
+                  % (r['id'], r['date'], r['field'] or '', r['name'] or '', r['en'] or ''))
+        print('\n【已用过的心理学分支】')
+        pseen, porder = set(), []
+        for r in psych:
+            if r['field'] and r['field'] not in pseen:
+                pseen.add(r['field']); porder.append(r['field'])
+        print('  ' + ('、'.join(porder) if porder else '（无）'))
+    else:
+        print('  （还没有条目，从 001 开始）')
+        porder = []
+
     print('\n【英语：已给过 %d 条，%d 天】不得重复' % (len(used_en), len(day_rows)))
     for dt, n in day_rows:
         print('  %s  %d 条' % (dt, n))
@@ -144,7 +179,9 @@ def main():
     print('')
     json.dump({'next_id': nxt, 'today': today_sg(), 'avoid_sectors': recent,
                'used_sectors': order, 'used_english': used_en,
-               'issues': rows, 'missing_web': missing},
+               'issues': rows, 'missing_web': missing,
+               'next_psych_id': ps_nxt, 'avoid_psych_fields': ps_recent,
+               'used_psych_fields': porder, 'psych': psych},
               io.open(os.path.join(ROOT, '.state.json'), 'w', encoding='utf-8'),
               ensure_ascii=False, indent=2)
     print('（同样的内容已写到 .state.json）')

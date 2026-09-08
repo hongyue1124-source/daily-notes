@@ -189,9 +189,10 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;
   background:var(--paper);border-top:1px solid var(--rule);
   padding-bottom:var(--safe-b);
-  display:grid;grid-template-columns:repeat(5,1fr);max-width:640px;margin:0 auto}
+  display:grid;grid-template-columns:repeat(6,1fr);max-width:640px;margin:0 auto}
+/* 6 个 tab 时 390px 宽下每格约 65px，字号从 10px 降到 9.5px、字距收紧，保证两个汉字不换行 */
 .tab{min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted)}
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--muted);white-space:nowrap}
 .tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6;
   stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-selected="true"]{color:var(--accent-ink)}
@@ -415,6 +416,12 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
     <div id="bookBody"></div>
   </section>
 
+  <!-- 心理 -->
+  <section class="screen" id="s-psych">
+    <div class="topbar"><h1>心理</h1><span class="sub" id="psyCount"></span></div>
+    <div id="psyBody"></div>
+  </section>
+
   <!-- 我的 -->
   <section class="screen" id="s-me">
     <div class="topbar"><h1>我的</h1></div>
@@ -442,6 +449,8 @@ button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:p
     <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/><path d="M17.5 10.5l2.5 2.5-2.5 2.5"/></svg>英语</button>
   <button class="tab" role="tab" aria-selected="false" data-go="books">
     <svg viewBox="0 0 24 24"><path d="M12 7.4v12.1"/><path d="M12 7.4C10.4 6.1 8.5 5.4 6 5.4H3.4v12.1H6c2.5 0 4.4.7 6 2"/><path d="M12 7.4c1.6-1.3 3.5-2 6-2h2.6v12.1H18c-2.5 0-4.4.7-6 2"/></svg>读书</button>
+  <button class="tab" role="tab" aria-selected="false" data-go="psych">
+    <svg viewBox="0 0 24 24"><path d="M12 3.2a5.9 5.9 0 0 0-3.5 10.7c.7.5 1.1 1.2 1.2 2h4.6c.1-.8.5-1.5 1.2-2A5.9 5.9 0 0 0 12 3.2z"/><path d="M9.9 18.6h4.2"/><path d="M10.6 21h2.8"/></svg>心理</button>
   <button class="tab" role="tab" aria-selected="false" data-go="me">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>我的</button>
 </nav>
@@ -6522,16 +6531,322 @@ const BOOKS = [
  }
 ];
 
+/* ═══════════ 心理学实验：每条一个经典实验 ═══════════ */
+/* 六节固定：问题 / 设计 / 结果 / 反直觉 / 后续 / 拿走。
+   最新的排最前，和 ISSUES / ENGLISH 一致；id 与 ISSUES 是两套编号，互不相干。 */
+const PSYCH = [
+{
+  "id": "001",
+  "date": "2026-09-08",
+  "field": "认知心理学",
+  "name": "选择盲视",
+  "en": "Choice Blindness",
+  "who": "Johansson, Hall, Sikström & Olsson",
+  "year": "2005",
+  "journal": "Science",
+  "minutes": 8,
+  "web": "",
+  "deck": "2005 年，瑞典隆德大学的四个人用一副扑克的<b>掉包手法</b>，在「你选了哪张脸」和「你拿到哪张脸」之间插了一根楔子。354 次掉包，当场只被识破 46 次；剩下那些人拿着自己刚刚淘汰掉的照片，<b>为一个自己没做过的选择，当场说出了理由</b>。",
+  "takeaway": "「这个实验动摇的不是『人会不会看走眼』，而是『我为什么这么选』这句话的地位——它更像事后补写的说明书，不是决策过程的实况转播。」",
+  "sections": [
+    {
+      "n": "§1",
+      "tag": "问题",
+      "h": "「我为什么选它」能不能当证据用",
+      "q": "一个人说出的选择理由，是从真实的决策过程里读出来的，还是被问到的那一刻才生成的？",
+      "blocks": [
+        {
+          "t": "p",
+          "v": "决策研究有个默认前提：人能察觉「打算做的事」和「实际拿到的结果」之间的错位。与之配套的是 [[内省]]——被问「你为什么选它」时，多数人相信自己是在报告一段真实的心理过程，不是现编。"
+        },
+        {
+          "t": "p",
+          "v": "1977 年 Nisbett 和 Wilson 指出，人给的理由常和真正影响行为的因素对不上。这套证据只在群体层面成立，你没法指着某一个人说，这句是他 [[虚构|编]] 的。"
+        },
+        {
+          "t": "p",
+          "v": "要抓个体的现行，得先知道他真正选了哪一个，再看他为哪一个辩护——这需要在「选择」和「结果」之间硬插一根楔子。2005 年这组人用扑克魔术做到了。"
+        }
+      ]
+    },
+    {
+      "n": "§2",
+      "tag": "设计",
+      "h": "藏在照片背后的第二张卡",
+      "q": "实验要怎么设计，才能让被试当场为「他刚淘汰掉的选项」辩护，而且毫无察觉？",
+      "blocks": [
+        {
+          "t": "p",
+          "v": "120 名被试（其中 70 名女性）每人看 15 对女性面孔，每对里指出更好看的那张。指完，主试把照片翻过来递到他手上，紧接着问：为什么选她。"
+        },
+        {
+          "t": "p",
+          "v": "关键操纵藏在其中 3 对里，论文称之为 [[操纵试次]]。每张卡背后事先粘了第二张，画的是被试<b>没选</b>的那张脸。主试翻牌时用袖子挡一下，把背面那张滑过去——递到手里的，正是他刚淘汰掉的人。"
+        },
+        {
+          "t": "h4",
+          "v": "精妙在三处"
+        },
+        {
+          "t": "ol",
+          "v": [
+            "<b>因变量是一段话，不是一个分数。</b>理由可以逐句判定它在描述哪一张脸，「编理由」第一次能在个体层面抓现行。",
+            "<b>对照来自同一个人。</b>每人还要为另外 3 对<b>没被</b>动过手脚的照片说理由，同一个人的两套报告直接对比，个体差异被消掉。",
+            "<b>把最容易想到的反驳提前堵死。</b>做成 3×2 的 [[组间设计]]：思考时间（2 秒 / 5 秒 / 不限）× 面孔相似度（高相似组平均 5.7 分、低相似组 3.4 分，10 分制）。"
+          ]
+        }
+      ]
+    },
+    {
+      "n": "§3",
+      "tag": "结果",
+      "h": "354 次掉包，当场识破 46 次",
+      "q": "被换掉的那张脸就攥在自己手里，被试能识破多少次？",
+      "blocks": [
+        {
+          "t": "p",
+          "v": "全部 354 次操纵试次里，当场识破 46 次，占 13%。近九成的情况下，人拿着一张自己刚否决的照片，不觉得不对。"
+        },
+        {
+          "t": "table",
+          "cap": "掉包被识破的比例（Johansson et al., 2005）",
+          "head": [
+            "条件",
+            "识破率",
+            "这个数字意味着什么"
+          ],
+          "rows": [
+            [
+              "全部 354 次操纵试次",
+              [
+                "n",
+                "13%（46 次）"
+              ],
+              "照片就在手上，近九成没发现"
+            ],
+            [
+              "不限时间 + 低相似面孔",
+              [
+                "n",
+                "≤ 27%"
+              ],
+              "最有利的一组，仍约四分之三漏掉"
+            ],
+            [
+              "把事后访谈也算上（全体）",
+              [
+                "n",
+                "≤ 26%"
+              ],
+              "换个时间再问，仍不到三成"
+            ],
+            [
+              "2 秒 vs 5 秒",
+              "无显著差异",
+              "多看 3 秒没用"
+            ],
+            [
+              "高相似 vs 低相似面孔",
+              "无显著差异",
+              "不是「长得太像」"
+            ]
+          ]
+        },
+        {
+          "t": "p",
+          "v": "只有「不限时间」显著高于限时组（t(118) = 2.17，p < 0.05），性别和年龄都没差异。最关键的是相似度：两张脸本来不像，被掉包该一眼看出；可低相似组的识破率和高相似组一样低——漏掉掉包不是「看错了」。"
+        }
+      ]
+    },
+    {
+      "n": "§4",
+      "tag": "反直觉",
+      "h": "为自己淘汰掉的那张脸辩护，说得和真话一样有底气",
+      "q": "如果理由是当场编的，为什么听上去和真理由没区别？",
+      "blocks": [
+        {
+          "t": "chain",
+          "items": [
+            [
+              "① 事实",
+              "354 次掉包近九成当场没被识破。这些人攥着自己刚淘汰的那张脸，被要求说出「为什么选她」。"
+            ],
+            [
+              "② 按常理该推出什么",
+              "人对自己几秒前的决定该有一条特权通道。为一个没做过的选择找理由，总该更短、更犹豫，至少露点破绽。"
+            ],
+            [
+              "③ 实际却是",
+              "两套报告长度几乎一样（33 对 38 个字符）；空报告、时态、笑声都没差别；三名盲评者在情绪度 3.5、具体度 3.1、确信度 3.3（1–5 分）上也分不出哪些是操纵报告。唯一显著更多的是「回头质疑自己动机」这类自评（t(118) = 3.31，p < 0.005），只占 5%。"
+            ],
+            [
+              "④ 所以问题是",
+              "如果两种辩护在长度、细节、情绪、确信度上都测不出区别，我们凭什么认为平时说出口的理由是从决策过程里读出来的？"
+            ]
+          ]
+        },
+        {
+          "t": "p",
+          "v": "最锋利的一类叫 [[特定虚构]]：理由指向的特征只有手上这张脸才有——对着深色头发的照片说「我喜欢她是金发」。"
+        },
+        {
+          "t": "risk",
+          "items": [
+            "论文报告的是<b>试次层面</b>的识破率。流传的「87% 的人都会编理由」是 13% 的补数，指次数不指人。",
+            "因变量是<b>说出来的话</b>。没报告 ≠ 没察觉——可能察觉了，只是不好意思讲。",
+            "材料是陌生人的脸，被试本来没有强偏好。<span class=\"flag\">我的解读</span>这更像范式的适用范围，不是心智常数。",
+            "样本来自瑞典一所大学；实验室里「别多嘴」的压力，日常未必有。"
+          ]
+        }
+      ]
+    },
+    {
+      "n": "§5",
+      "tag": "后续",
+      "h": "二十年后：现象站住了，「盲」这个字没站稳",
+      "q": "二十年过去，这个效应被推到了多远，又在哪些地方被收窄甚至被推翻？",
+      "blocks": [
+        {
+          "t": "p",
+          "v": "2010 年同一组人把摊子摆进超市，让顾客试吃两种果酱、闻两种茶，选完再掉包：被识破的不超过三分之一，连「肉桂苹果对苦味葡萄柚」也没过半。2012 年他们把被试刚填好的道德立场偷偷换成相反的——160 人里 69% 至少漏掉一处，约 53% 为原本反对的立场辩护过。"
+        },
+        {
+          "t": "p",
+          "v": "2017 年阿根廷一组人做成 3,106 人的网络版政治议题实验，约一半的操纵没被识破。同一篇论文给出一个收窄：即便在<b>没被识破</b>的题上，信心分也显著低于未被操纵的题；这一版的投票意向也没被改变，和瑞典那批对不上。"
+        },
+        {
+          "t": "p",
+          "v": "2016 年 Somerville 与 McGowan 换成孩子熟悉的巧克力品牌，识破率约 85%——偏好一强，效应基本消失。2025 年 Grassi 等人一边掉包一边测瞳孔：当场只报告了 56.4%；若真没察觉，事后更该想不起来，可追问时有 84.45% 被正确指认，且不论有无报告，瞳孔都放大。"
+        },
+        {
+          "t": "p",
+          "v": "分歧落在这里：现象二十年来反复重复出来，争的是「盲」在哪一层——内省够不到自己的意图，还是够得到、只是不说。目前无定论。"
+        }
+      ]
+    },
+    {
+      "n": "§6",
+      "tag": "拿走",
+      "h": "用在自己身上",
+      "q": "这个实验能改变你日常的哪一件事？",
+      "blocks": [
+        {
+          "t": "takeaway",
+          "lbl": "能跟人聊的一句话",
+          "v": "「这个实验动摇的不是『人会不会看走眼』，而是『我为什么这么选』这句话的地位——它更像事后补写的说明书，不是决策过程的实况转播。」"
+        },
+        {
+          "t": "watch",
+          "items": [
+            [
+              "01",
+              "留意理由出现的时刻",
+              "刚点完外卖、刚投完票，注意「我选它是因为……」冒出来的时间点：它在你按下决定之前就在，还是被问了才长出来？"
+            ],
+            [
+              "02",
+              "默认项被换过，你多半发现不了",
+              "网站替你勾好的选项、同事改过的方案、算法重排过的列表：只要你本来没有强偏好，换掉了多半察觉不到。"
+            ],
+            [
+              "03",
+              "辩护越流畅，越该查记录",
+              "那份道德问卷里有一半人能为十分钟前反对的立场流畅辩护。翻出「我当初写了什么」比问「我当初怎么想」可靠。"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "terms": [
+    {
+      "zh": "选择盲视",
+      "en": "Choice Blindness",
+      "def": "选择的结果被偷偷换成自己没选的那个，本人却察觉不到，还会为这个结果给出理由。"
+    },
+    {
+      "zh": "虚构",
+      "en": "Confabulation",
+      "def": "没有欺骗意图，却说出一段自己相信为真、但并非来自真实记忆或真实决策过程的解释。"
+    },
+    {
+      "zh": "特定虚构",
+      "en": "Specific Confabulation",
+      "def": "理由指向的特征只有手上这张（被换来的）照片才有，因此不可能是在描述原来的选择——论文里最硬的一类证据。"
+    },
+    {
+      "zh": "内省",
+      "en": "Introspection",
+      "def": "向内观察并报告自己心理过程的能力。这个实验质疑的正是它的可靠程度，而不是它的存在。"
+    },
+    {
+      "zh": "操纵试次",
+      "en": "Manipulated Trial",
+      "def": "实验里被动过手脚的那几次。与同一名被试的未操纵试次（NM）对照，用来把个体差异消掉。"
+    },
+    {
+      "zh": "组间设计",
+      "en": "Between-Group Design",
+      "def": "不同条件分给不同的人，每人只经历一种条件，避免被试从条件切换中猜出实验意图。"
+    }
+  ],
+  "sources": [
+    {
+      "d": "2005-10-07",
+      "n": "Johansson, Hall, Sikström & Olsson, Failure to Detect Mismatches Between Intention and Outcome in a Simple Decision Task, Science 310(5745):116–119",
+      "u": "https://www.lucs.lu.se/fileadmin/user_upload/lucs/2011/01/Johansson-et-al.-2005-Failure-to-Detect-Mismatches-Between-Intention-and-Outcome-in-a-Simple-Decision-Task.pdf",
+      "note": "本条全部一手数字的出处：120 名被试（70 名女性）、15 对照片中 3 对被掉包、354 次操纵试次中 46 次（13%）当场识破、所有识破形式合计不超过 26%、报告长度 33 对 38 字符、情绪度 3.5 / 具体度 3.1 / 确信度 3.3。"
+    },
+    {
+      "d": "2005-10-07",
+      "n": "Science 期刊页（DOI: 10.1126/science.1111709）",
+      "u": "https://www.science.org/doi/10.1126/science.1111709",
+      "note": "核对发表期刊、卷期页码与发表日期。"
+    },
+    {
+      "d": "2010-10-01",
+      "n": "Hall, Johansson, Tärning, Sikström & Deutgen, Magic at the marketplace, Cognition 117(1):54–61",
+      "u": "https://portal.research.lu.se/en/publications/magic-at-the-marketplace-choice-blindness-for-the-taste-of-jam-an/",
+      "note": "支撑 §5 的超市复制：果酱与茶叶掉包，被识破的不超过三分之一，极端口味组合也没过半。"
+    },
+    {
+      "d": "2012-09-19",
+      "n": "Hall, Johansson & Strandberg, Lifting the Veil of Morality, PLoS ONE 7(9):e45457",
+      "u": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0045457",
+      "note": "支撑 §5 与 §6 第三条：160 人，69% 至少漏掉两处改动中的一处，约 53% 明确为原本反对的立场辩护。"
+    },
+    {
+      "d": "2017-02-14",
+      "n": "Rieznik et al., A massive experiment on choice blindness in political decisions, PLoS ONE 12(2):e0171108",
+      "u": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0171108",
+      "note": "支撑 §5 的规模化版本：3,106 人完成，约一半操纵未被识破；未被识破的回答信心分显著更低；投票意向未被改变。"
+    },
+    {
+      "d": "2016-04-01",
+      "n": "Somerville & McGowan, Can chocolate cure blindness?, Journal of Behavioral and Experimental Economics 61:1–11",
+      "u": "https://www.sciencedirect.com/science/article/abs/pii/S2214804316000021",
+      "note": "支撑 §5 的边界条件：换成孩子熟悉的巧克力品牌后识破率约 85%，仅 10–20% 漏掉。"
+    },
+    {
+      "d": "2025-12-04",
+      "n": "Grassi, Hoeppe, Baytimur & Bartels, Restoring sight in choice blindness, Frontiers in Psychology 16",
+      "u": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2025.1598254/full",
+      "note": "支撑 §4 局限第二条与 §5 的最新挑战：当场报告 56.4%、事后追问 84.45% 被正确指认，且所有操纵试次瞳孔均放大。"
+    }
+  ]
+},
+];
+
 /* 当前内容版本；与 version.json 比对来发现新一期 */
-const BUILD = "2026-09-07";
+const BUILD = "2026-09-08";
 
 /* ═══════════ 存储 ═══════════ */
 const KEY="dib.v1";
-let S={read:{},star:{},starTerm:{},starEng:{},readBook:{},starBook:{},fs:1,theme:"auto"};
+let S={read:{},star:{},starTerm:{},starEng:{},readBook:{},starBook:{},readPsych:{},starPsych:{},fs:1,theme:"auto"};
 try{const r=localStorage.getItem(KEY); if(r) S=Object.assign(S,JSON.parse(r));}catch(e){}
-/* 老用户的 localStorage 里没有 readBook / starBook，Object.assign 保留默认值；
+/* 老用户的 localStorage 里没有 readBook / starBook / readPsych / starPsych，Object.assign 保留默认值；
    这一行再兜一次底，防止某个键被写成 null / 字符串导致后面取属性报错。 */
-["read","star","starTerm","starEng","readBook","starBook"].forEach(function(k){
+["read","star","starTerm","starEng","readBook","starBook","readPsych","starPsych"].forEach(function(k){
   if(!S[k]||typeof S[k]!=="object") S[k]={};
 });
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -6549,8 +6864,11 @@ const $=s=>document.querySelector(s);
 const allTerms=()=>ISSUES.flatMap(i=>i.terms.map(t=>({...t,iss:i.id,issTitle:i.title})));
 /* 书里的「关键概念」也进全局术语表；同名时以笔记的定义优先，不改动已有气泡 */
 const bookTerms=()=>BOOKS.flatMap(b=>(b.terms||[]).map(t=>({...t,bk:b.id,bkTitle:b.title})));
+/* 心理学实验的术语也进全局气泡；优先级：期刊 > 书 > 实验，同名时不覆盖已有定义 */
+const psychTerms=()=>PSYCH.flatMap(p=>(p.terms||[]).map(t=>({...t,ps:p.id,psName:p.name})));
 const termMap=()=>{const m={};allTerms().forEach(t=>m[t.zh]=t);
-  bookTerms().forEach(t=>{if(!m[t.zh])m[t.zh]=t});return m};
+  bookTerms().forEach(t=>{if(!m[t.zh])m[t.zh]=t});
+  psychTerms().forEach(t=>{if(!m[t.zh])m[t.zh]=t});return m};
 const TM=termMap();
 
 /* [[术语]] 或 [[术语|显示文字]] → 可点击 chip */
@@ -6697,6 +7015,64 @@ function renderBooks(){
     `<div class="empty">点书名进去：上半部「一页读懂」和核心主题直接展开，下半部逐章折叠，点开再读。</div>`;
 }
 
+/* ═══════════ 渲染：心理 ═══════════ */
+/* 进度和收藏写的是 S.readPsych / S.starPsych，和文章的 S.read / S.star 完全分开 */
+function isReadPs(id){return !!(S.readPsych[id]&&S.readPsych[id].done)}
+function progPs(id){const r=S.readPsych[id];return r?Math.min(1,r.p||0):0}
+function psychReadN(){return PSYCH.filter(p=>isReadPs(p.id)).length}
+function psychRow(p){
+  const done=isReadPs(p.id), pr=progPs(p.id), on=!!S.starPsych[p.id];
+  return `<button class="row" data-openpsych="${p.id}">
+    <span class="no">${p.id}</span>
+    <span><span class="ttl">${p.name}</span>
+      <span class="meta"><span>${fmtDate(p.date)}</span><span class="chip">${p.field}</span>
+      <span>${done?"已读":(pr>0?Math.round(pr*100)+"%":"未读")}</span>${on?"<span>已收藏</span>":""}</span>
+      <span class="sub">${p.en} · ${p.who}, ${p.year}</span></span>
+    <span class="dot ${done?"done":""}"></span></button>`;
+}
+function renderPsych(){
+  $("#psyCount").textContent=`共 ${PSYCH.length} 条`;
+  if(!PSYCH.length){
+    $("#psyBody").innerHTML=`<div class="empty">还没有实验条目。</div>`;return}
+  const p0=PSYCH[0], pr=progPs(p0.id), done=isReadPs(p0.id);
+  const C=2*Math.PI*14;
+  let html=`<div class="pad">
+    <article class="card">
+      <div class="hero">
+        <div class="eyebrow">
+          <span class="chip">第 ${p0.id} 条</span>
+          <span class="chip acc">${p0.field}</span>
+          <span class="chip">${p0.en}</span>
+          <span>${fmtDate(p0.date)} · 约 ${p0.minutes} 分钟</span>
+        </div>
+        <h2>${p0.name}</h2>
+        <p class="deck">${p0.deck}</p>
+        <div class="btnrow">
+          <button class="btn" data-openpsych="${p0.id}">${done?"重读这条":(pr>0?"继续阅读":"开始阅读")}</button>
+          <div class="ringwrap">
+            <svg class="ring" viewBox="0 0 34 34"><circle class="bg" cx="17" cy="17" r="14"/>
+            <circle class="fg" cx="17" cy="17" r="14" stroke-dasharray="${(pr*C).toFixed(1)} ${C.toFixed(1)}"/></svg>
+            <span>${Math.round(pr*100)}</span>
+          </div>
+        </div>
+      </div>
+    </article>
+    <article class="card quote"><div class="mini">
+      <div class="lbl">能跟人聊的一句话</div><p>${p0.takeaway}</p>
+    </div></article>
+    <article class="card"><div class="mini">
+      <div class="lbl">出处</div><p>${p0.who}（${p0.year}），《${p0.journal}》</p>
+    </div></article>
+  </div>`;
+  let month="";
+  PSYCH.forEach(p=>{
+    const m=p.date.slice(0,7);
+    if(m!==month){month=m;html+=`<div class="monthlbl">${m.replace("-"," 年 ")} 月</div>`}
+    html+=psychRow(p);
+  });
+  $("#psyBody").innerHTML=html;
+}
+
 /* ═══════════ 渲染：我的 ═══════════ */
 function renderMe(){
   const readN=ISSUES.filter(i=>isRead(i.id)).length;
@@ -6704,13 +7080,20 @@ function renderMe(){
   const engN=Object.values(S.starEng).filter(Boolean).length;
   const bkN=booksReadN(), bkChN=chaptersReadN();
   const bkStarN=BOOKS.filter(b=>S.starBook[b.id]).length;
+  const psN=psychReadN();
+  const psStarN=PSYCH.filter(p=>S.starPsych[p.id]).length;
+  /* .stat 是三列网格，格子数得凑够 3 的倍数，否则最后一行会露出容器底色 */
+  const tmStarN=Object.values(S.starTerm).filter(Boolean).length;
   $("#stats").innerHTML=`
     <div><div class="n">${readN}</div><div class="l">已读期数</div></div>
     <div><div class="n">${starN}</div><div class="l">收藏文章</div></div>
     <div><div class="n">${engN}</div><div class="l">收藏英语</div></div>
     <div><div class="n">${bkN}</div><div class="l">读完的书</div></div>
     <div><div class="n">${bkChN}</div><div class="l">读过章节</div></div>
-    <div><div class="n">${bkStarN}</div><div class="l">收藏书目</div></div>`;
+    <div><div class="n">${bkStarN}</div><div class="l">收藏书目</div></div>
+    <div><div class="n">${psN}</div><div class="l">读过实验</div></div>
+    <div><div class="n">${psStarN}</div><div class="l">收藏实验</div></div>
+    <div><div class="n">${tmStarN}</div><div class="l">收藏术语</div></div>`;
   const starred=ISSUES.filter(i=>S.star[i.id]);
   $("#meBody").innerHTML=`
     <div class="monthlbl">阅读设置</div>
@@ -6735,6 +7118,9 @@ function renderMe(){
     <div class="monthlbl">收藏的书</div>
     ${BOOKS.filter(b=>S.starBook[b.id]).map((b,n)=>bookRow(b,n)).join("")
       ||`<div class="empty">还没有收藏。读书时点右上角的 ★</div>`}
+    <div class="monthlbl">收藏的实验</div>
+    ${PSYCH.filter(p=>S.starPsych[p.id]).map(psychRow).join("")
+      ||`<div class="empty">还没有收藏。读实验时点右上角的 ★</div>`}
     <div class="monthlbl">关于</div>
     <button class="set" id="btnUpd"><span class="k">检查更新</span><span class="v">内容版本 ${BUILD}</span></button>
     <div class="set"><span class="k">每天一期，早上 8 点自动更新</span><span class="v">v1.2</span></div>
@@ -6747,8 +7133,9 @@ let cur=null;      /* 正在读的那一期 */
 let curEng=null;   /* 正在读的那条英语 */
 let curBook=null;  /* 正在读的那本书 */
 let curChap=null;  /* 正在读的那一章（curBook 同时保持，关掉才回得去那本书） */
+let curPsych=null; /* 正在读的那条心理学实验 */
 let bookScrollY=0; /* 进章节前书页的滚动位置 */
-/* cur / curEng / curBook 三者互斥；curChap 只在 curBook 非空时出现 */
+/* cur / curEng / curBook / curPsych 四者互斥；curChap 只在 curBook 非空时出现 */
 function blockHTML(b){
   switch(b.t){
     case "p": return `<p>${inl(b.v)}</p>`;
@@ -6774,7 +7161,7 @@ function blockHTML(b){
 }
 function openIssue(id){
   const i=ISSUES.find(x=>x.id===id); if(!i) return;
-  cur=i; curEng=null;
+  cur=i; curEng=null; curPsych=null;
   $("#rId").textContent=`第 ${i.id} 期 · ${i.sector}`;
   $("#rMark").hidden=false;
   $("#rStar").classList.toggle("on",!!S.star[i.id]);
@@ -6798,10 +7185,38 @@ function openIssue(id){
   document.body.style.overflow="hidden";
   updProg();
 }
+/* 心理学实验的全屏阅读器：和 openIssue 同形，页眉多一行英文原名 / 研究者 / 年份 / 期刊 */
+function openPsych(id){
+  const p=PSYCH.find(x=>x.id===id); if(!p) return;
+  cur=null; curEng=null; curBook=null; curChap=null; curPsych=p;
+  $("#rId").textContent=`实验 ${p.id} · ${p.field}`;
+  $("#rMark").hidden=false;
+  $("#rStar").classList.toggle("on",!!S.starPsych[p.id]);
+  $("#rMark").classList.toggle("on",isReadPs(p.id));
+  let body=`<header class="rhead"><h2>${p.name}</h2><p class="deck">${p.deck}</p>
+    <p class="bmeta">${[p.en,p.who,p.year,`《${p.journal}》`]
+      .map(m=>`<span>${m}</span>`).join("")}</p></header>`;
+  body+=p.sections.map(s=>`<section class="sec">
+    <div class="sechd"><span class="n">${s.n}</span><span class="t">${s.tag}</span></div>
+    <h3>${s.h}</h3>${s.q?`<p class="secq"><b>本节回答</b>${inl(s.q)}</p>`:""}${s.blocks.map(blockHTML).join("")}</section>`).join("");
+  body+=`<section class="sec"><div class="sechd"><span class="n">§</span><span class="t">本条术语</span></div>
+    <h3>${p.terms.length} 条，点开可收藏</h3>${
+    p.terms.map(t=>`<button class="gitem" style="padding-left:0;padding-right:0" data-term="${t.zh}">
+      <span><span class="zh">${t.zh}</span><span class="en">${t.en}</span>
+      <span class="def">${t.def}</span></span>
+      <span class="star ${S.starTerm[t.zh]?"on":""}" data-starterm="${t.zh}">★</span></button>`).join("")}</section>`;
+  body+=`<div class="srcs"><h4>本条来源 · ${p.sources.length} 项</h4>${
+    p.sources.map(s=>`<a href="${s.u}" target="_blank" rel="noopener">
+      <span class="d">${s.d}</span><span class="nm">${s.n}</span><br><span style="color:var(--muted);font-size:13px">${s.note}</span></a>`).join("")}</div>`;
+  $("#rBody").innerHTML=body;
+  const R=$("#reader"); R.classList.add("on"); R.setAttribute("aria-hidden","false"); R.scrollTop=0;
+  document.body.style.overflow="hidden";
+  updProg();
+}
 /* 英语条目的全屏阅读器：复用 #reader 那套 DOM，字段与 ecardHTML 一致 */
 function openEng(k){
   const it=engAll().find(x=>engKey(x)===k); if(!it) return;
-  cur=null; curEng=it;
+  cur=null; curEng=it; curPsych=null;
   $("#rId").textContent=`${it.date.replace(/-/g,".")} · ${it.type}`;
   $("#rMark").hidden=true;
   $("#rStar").classList.toggle("on",!!S.starEng[k]);
@@ -6828,7 +7243,7 @@ function bkSec(s){
 /* 第一层：整本书。上半部完整展开，下半部逐章折叠成行 */
 function openBook(id,keepY){
   const b=BOOKS.find(x=>x.id===id); if(!b) return;
-  cur=null; curEng=null; curChap=null; curBook=b;
+  cur=null; curEng=null; curChap=null; curPsych=null; curBook=b;
   $("#rId").textContent=`《${b.title}》 · ${b.author}`;
   $("#rMark").hidden=true;
   $("#rStar").classList.toggle("on",!!S.starBook[b.id]);
@@ -6867,7 +7282,7 @@ function openChap(k){
   const b=BOOKS.find(x=>x.id===k.slice(0,p)); if(!b) return;
   const c=b.chapters.find(x=>x.no===k.slice(p+1)); if(!c) return;
   if(curBook&&!curChap) bookScrollY=$("#reader").scrollTop;
-  cur=null; curEng=null; curBook=b; curChap=c;
+  cur=null; curEng=null; curPsych=null; curBook=b; curChap=c;
   $("#rId").textContent=`《${b.title}》 · ${c.rng||c.no}`;
   $("#rMark").hidden=false;
   $("#rMark").classList.toggle("on",!!S.readBook[k]);
@@ -6888,9 +7303,9 @@ function openChap(k){
 
 function closeReader(){
   const R=$("#reader"); R.classList.remove("on"); R.setAttribute("aria-hidden","true");
-  document.body.style.overflow=""; cur=null; curEng=null; curBook=null; curChap=null;
+  document.body.style.overflow=""; cur=null; curEng=null; curBook=null; curChap=null; curPsych=null;
   $("#rMark").hidden=false;
-  renderToday(); renderArch($("#q").value); renderEng(); renderBooks(); renderMe();
+  renderToday(); renderArch($("#q").value); renderEng(); renderBooks(); renderPsych(); renderMe();
 }
 function updProg(){
   /* 章节：进度条按滚动走，读到底自动记「已读」，写的是 S.readBook（和文章的 S.read 分开） */
@@ -6901,6 +7316,19 @@ function updProg(){
     $("#rProg").style.width=(p*100)+"%";
     const k=chapKey(curBook,curChap);
     if(p>.92&&!S.readBook[k]){S.readBook[k]=true;save();$("#rMark").classList.add("on")}
+    return;
+  }
+  /* 心理学实验：写的是 S.readPsych，和 S.read / S.readBook 都分开。
+     必须排在 curChap 之后、cur 之前——四个 cur 变量互斥，先命中谁就用谁那套 store。 */
+  if(curPsych){
+    const R=$("#reader");
+    const max=R.scrollHeight-R.clientHeight;
+    const p=max>40?Math.min(1,R.scrollTop/max):1;
+    $("#rProg").style.width=(p*100)+"%";
+    const r=S.readPsych[curPsych.id]||(S.readPsych[curPsych.id]={p:0,done:false});
+    if(p>r.p) r.p=p;
+    if(p>.92&&!r.done){r.done=true;$("#rMark").classList.add("on")}
+    save();
     return;
   }
   /* 整本书页 / 英语条目都不记文章阅读进度，靠下面这行挡住 */
@@ -6920,7 +7348,8 @@ $("#reader").addEventListener("scroll",()=>{clearTimeout(window._pt);window._pt=
 function openTerm(k){
   const t=TM[k]; if(!t) return;
   $("#sheet").innerHTML=`<div class="grab"></div>
-    <div class="from">${t.iss?`第 ${t.iss} 期 · ${ISSUES.find(i=>i.id===t.iss).title}`:`《${t.bkTitle}》 · 关键概念`}</div>
+    <div class="from">${t.iss?`第 ${t.iss} 期 · ${ISSUES.find(i=>i.id===t.iss).title}`
+      :(t.bk?`《${t.bkTitle}》 · 关键概念`:`心理学实验 · ${t.psName}`)}</div>
     <div class="zh">${t.zh}</div><span class="en">${t.en}</span>
     <p class="def">${t.def}</p>
     <div class="btnrow">
@@ -6940,7 +7369,8 @@ document.addEventListener("click",e=>{
     S.starTerm[k]=!S.starTerm[k];save();
     if($("#sheet").classList.contains("on"))openTerm(k);
     renderMe();
-    if(cur)openIssueKeepScroll();return}
+    if(cur)openIssueKeepScroll();
+    if(curPsych)openPsychKeepScroll();return}
 
   const tm=t.closest("[data-term]");
   if(tm){openTerm(tm.dataset.term);return}
@@ -6956,6 +7386,9 @@ document.addEventListener("click",e=>{
 
   const oc=t.closest("[data-openchap]");
   if(oc){openChap(oc.dataset.openchap);return}
+
+  const op2=t.closest("[data-openpsych]");
+  if(op2){openPsych(op2.dataset.openpsych);return}
 
   const go=t.closest("[data-go]");
   if(go){switchTab(go.dataset.go);return}
@@ -6980,7 +7413,8 @@ document.addEventListener("click",e=>{
   if(t.closest("#rClose")){
     if(curChap){const bid=curBook.id;curChap=null;openBook(bid,true);return}
     closeReader();return}
-  /* ★ 的分支顺序要紧：章 → 书 → 英语 → 文章，写的是各自独立的 store */
+  /* ★ 的分支顺序要紧：章 → 书 → 英语 → 心理 → 文章，写的是各自独立的 store。
+     四个 cur 变量互斥（openXXX 进来时会把其余三个清空），所以先命中的那条一定是对的。 */
   if(t.closest("#rStar")&&curChap){const k=chapKey(curBook,curChap);
     S.starBook[k]=!S.starBook[k];save();
     $("#rStar").classList.toggle("on",!!S.starBook[k]);renderMe();return}
@@ -6990,11 +7424,18 @@ document.addEventListener("click",e=>{
   if(t.closest("#rStar")&&curEng){const k=engKey(curEng);
     S.starEng[k]=!S.starEng[k];save();
     $("#rStar").classList.toggle("on",!!S.starEng[k]);renderMe();return}
+  if(t.closest("#rStar")&&curPsych){const k=curPsych.id;
+    S.starPsych[k]=!S.starPsych[k];save();
+    $("#rStar").classList.toggle("on",!!S.starPsych[k]);renderPsych();renderMe();return}
   if(t.closest("#rStar")&&cur){S.star[cur.id]=!S.star[cur.id];save();
     $("#rStar").classList.toggle("on",!!S.star[cur.id]);return}
   if(t.closest("#rMark")&&curChap){const k=chapKey(curBook,curChap);
     S.readBook[k]=!S.readBook[k];save();
     $("#rMark").classList.toggle("on",!!S.readBook[k]);renderBooks();renderMe();return}
+  if(t.closest("#rMark")&&curPsych){
+    const r=S.readPsych[curPsych.id]||(S.readPsych[curPsych.id]={p:0,done:false});
+    r.done=!r.done; if(r.done)r.p=1; save();
+    $("#rMark").classList.toggle("on",r.done);renderPsych();renderMe();return}
   if(t.closest("#rMark")&&cur){
     const r=S.read[cur.id]||(S.read[cur.id]={p:0,done:false});
     r.done=!r.done; if(r.done)r.p=1; save();
@@ -7003,6 +7444,9 @@ document.addEventListener("click",e=>{
 });
 function openIssueKeepScroll(){
   const R=$("#reader"),y=R.scrollTop,id=cur.id;openIssue(id);R.scrollTop=y;
+}
+function openPsychKeepScroll(){
+  const R=$("#reader"),y=R.scrollTop,id=curPsych.id;openPsych(id);R.scrollTop=y;
 }
 $("#q").addEventListener("input",e=>renderArch(e.target.value));
 
@@ -7013,11 +7457,12 @@ function switchTab(name){
   if(name==="archive")renderArch($("#q").value);
   if(name==="english")renderEng();
   if(name==="books")renderBooks();
+  if(name==="psych")renderPsych();
   if(name==="me")renderMe();
   if(name==="today")renderToday();
 }
 
-renderToday(); renderArch(); renderEng(); renderBooks(); renderMe();
+renderToday(); renderArch(); renderEng(); renderBooks(); renderPsych(); renderMe();
 
 /* ═══════════ 自动更新 ═══════════
    手机主屏幕 App 从后台切回来时，会向 version.json 问一句「有没有新一期」。

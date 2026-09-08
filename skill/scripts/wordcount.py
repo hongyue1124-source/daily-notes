@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""数六节正文的汉字数。目标 2500–3500 字。
+"""数六节正文的汉字数。产业长文目标 2500–3500 字，心理学实验目标 1200–1800 字。
 
-    python3 skill/scripts/wordcount.py payload.json   # 数 payload 里的当期
+    python3 skill/scripts/wordcount.py payload.json   # 数 payload 里的 issue 和 psych
     python3 skill/scripts/wordcount.py                # 数 index.html 里最新一期
 
 历史教训：第 003 期初稿 5,245 字，压了三轮才到 3,960，仍然超标。
 建议一开始就按配额写：§1 450 / §2 550 / §3 900 / §4 650 / §5 600 / §6 350。
+心理学实验按 §1 200 / §2 350 / §3 250 / §4 280 / §5 320 / §6 150 写。
 """
 import io, os, re, sys, json
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 QUOTA = {1: 450, 2: 550, 3: 900, 4: 650, 5: 600, 6: 350}
+PSYCH_QUOTA = {1: 200, 2: 350, 3: 250, 4: 280, 5: 320, 6: 150}
 HAN = re.compile(r'[一-鿿]')
 
 
@@ -42,9 +44,34 @@ def count_section(sec):
     return n
 
 
+def report(obj, quota, lo, hi, label):
+    total = 0
+    print('\n【%s】' % label)
+    print('%-6s %6s %7s   %s' % ('节', '汉字', '配额', ''))
+    for i, sec in enumerate(obj.get('sections', []), 1):
+        n = count_section(sec)
+        total += n
+        q = quota.get(i, 0)
+        bar = '超 %+d' % (n - q) if abs(n - q) > 80 else 'ok'
+        print('%-6s %6d %7d   %s' % (sec.get('n', '§%d' % i), n, q, bar))
+    print('-' * 34)
+    ok = lo <= total <= hi
+    print('%-6s %6d %7d   %s' % ('合计', total, hi, '✓ 在 %d–%d 区间' % (lo, hi) if ok else
+          ('✗ 超标 %d 字，需要压缩' % (total - hi) if total > hi else '✗ 太短 %d 字' % (lo - total))))
+    return ok
+
+
 def main():
     if len(sys.argv) > 1:
-        iss = json.load(io.open(sys.argv[1], encoding='utf-8'))['issue']
+        p = json.load(io.open(sys.argv[1], encoding='utf-8'))
+        oks = []
+        if p.get('issue'):
+            oks.append(report(p['issue'], QUOTA, 2500, 3500, '产业长文'))
+        if p.get('psych'):
+            oks.append(report(p['psych'], PSYCH_QUOTA, 1200, 1800, '心理学实验'))
+        if not oks:
+            sys.exit('payload 里既没有 issue 也没有 psych')
+        sys.exit(0 if all(oks) else 1)
     else:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from state import slice_array, top_objects, field
@@ -54,21 +81,14 @@ def main():
         # 粗算：整个对象里的汉字，减去 terms/sources 的部分
         total = han(obj)
         print('对象内汉字合计约 %d（含术语表与来源，正文实际略少）' % total)
+        try:
+            po = top_objects(slice_array(src, 'const PSYCH = ['))
+        except ValueError:
+            po = []
+        if po:
+            print('（最新心理学实验：%s %s）对象内汉字合计约 %d'
+                  % (field(po[0], 'id'), field(po[0], 'name'), han(po[0])))
         return
-
-    total = 0
-    print('%-6s %6s %7s   %s' % ('节', '汉字', '配额', ''))
-    for i, sec in enumerate(iss.get('sections', []), 1):
-        n = count_section(sec)
-        total += n
-        q = QUOTA.get(i, 0)
-        bar = '超 %+d' % (n - q) if abs(n - q) > 80 else 'ok'
-        print('%-6s %6d %7d   %s' % (sec.get('n', '§%d' % i), n, q, bar))
-    print('-' * 34)
-    ok = 2500 <= total <= 3500
-    print('%-6s %6d %7d   %s' % ('合计', total, 3500, '✓ 在 2500–3500 区间' if ok else
-          ('✗ 超标 %d 字，需要压缩' % (total - 3500) if total > 3500 else '✗ 太短 %d 字' % (2500 - total))))
-    sys.exit(0 if ok else 1)
 
 
 if __name__ == '__main__':

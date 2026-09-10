@@ -61,7 +61,6 @@ const BROWSER = [
 const LAUNCH = BROWSER ? { executablePath: BROWSER } : {};
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const PORT = 8899;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
                '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 
@@ -83,7 +82,9 @@ const check = (name, ok, extra = '') => {
   console.log(`${ok ? '  ✓' : '  ✗'} ${name}${extra ? '  ' + extra : ''}`);
 };
 
-await new Promise(r => server.listen(PORT, '127.0.0.1', r));
+/* 端口交给系统分配：写死端口会被本机其他服务占掉，整个校验直接崩在这一行 */
+await new Promise(r => server.listen(0, '127.0.0.1', r));
+const PORT = server.address().port;
 
 const browser = await chromium.launch(LAUNCH);
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'allow' });

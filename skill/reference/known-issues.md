@@ -297,17 +297,11 @@ BUILD 里混进字母，**第二天的定时任务会直接 die 在「sw.js 里�
 
 **不要做**：不要去 `kill` 那个进程——它可能是用户自己在用的，而且认证/进程类命令会被权限分类器拦。
 
-**绕过办法**（临时副本换端口，跑完删掉）：
+**已修复（2026-09-10 当天）**：`verify.mjs` 改成 `server.listen(0, …)` 让系统分配空闲端口，
+再从 `server.address().port` 读回实际端口。现在不管本机占了什么端口都不会撞，**不需要任何环境变量或临时副本**。
 
-```bash
-cd "/Users/panpan/Downloads/Claude Code/每日知识/daily-notes"
-sed 's/const PORT = 8899;/const PORT = Number(process.env.VERIFY_PORT || 8899);/' \
-    skill/scripts/verify.mjs > skill/scripts/.verify_tmp.mjs
-VERIFY_PORT=8907 node skill/scripts/.verify_tmp.mjs
-rm -f skill/scripts/.verify_tmp.mjs
-```
-
-`verify_books.mjs` 如果也撞端口，同样处理。
+`verify_books.mjs` 还是写死端口的，哪天撞上了照同样的办法改：`listen(0)` + `server.address().port`，
+不要用 `sed` 生成临时副本那种绕法——那样修的是副本，正式脚本下次还会崩。
 
 ---
 

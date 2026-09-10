@@ -1,6 +1,6 @@
 /* 每日行业笔记 · Service Worker
    每次内容更新时，把下面的 BUILD 改成当天日期，旧缓存会被自动清掉。 */
-const BUILD = '2026-09-08';
+const BUILD = '2026-09-10';
 /* 同一天内容又改过就把 REV 往前推一格（BUILD 由 insert_issue.py 按期号日期改，别动它的格式）。
    改 REV 会让 sw.js 字节变化 → 手机端重新 install → 旧缓存被 activate 清掉。 */
 const REV = 'r2';

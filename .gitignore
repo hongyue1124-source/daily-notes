@@ -5,3 +5,5 @@
 # Python 字节码
 __pycache__/
 *.pyc
+# 每日 payload（insert_issue.py 的输入），内容已写进 index.html，不必入库
+payload.json

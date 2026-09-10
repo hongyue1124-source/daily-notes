@@ -287,6 +287,48 @@ BUILD 里混进字母，**第二天的定时任务会直接 die 在「sw.js 里�
 
 ---
 
+### 11. `verify.mjs` 的 8899 端口被别的进程占着 —— 2026-09-10
+
+**症状**：`node skill/scripts/verify.mjs` 直接崩在
+`Error: listen EADDRINUSE: address already in use 127.0.0.1:8899`，一项都没跑。
+
+**原因**：`verify.mjs` 里 `const PORT = 8899;` 是写死的。用户 Mac 上长期挂着别的
+本地服务（这次是一个 `python -m http.server`，`lsof -nP -iTCP:8899 -sTCP:LISTEN` 能看到是谁）。
+
+**不要做**：不要去 `kill` 那个进程——它可能是用户自己在用的，而且认证/进程类命令会被权限分类器拦。
+
+**绕过办法**（临时副本换端口，跑完删掉）：
+
+```bash
+cd "/Users/panpan/Downloads/Claude Code/每日知识/daily-notes"
+sed 's/const PORT = 8899;/const PORT = Number(process.env.VERIFY_PORT || 8899);/' \
+    skill/scripts/verify.mjs > skill/scripts/.verify_tmp.mjs
+VERIFY_PORT=8907 node skill/scripts/.verify_tmp.mjs
+rm -f skill/scripts/.verify_tmp.mjs
+```
+
+`verify_books.mjs` 如果也撞端口，同样处理。
+
+---
+
+### 12. 网页版 artifact：术语气泡的 `::after` 会把手机端撑出横向滚动 —— 2026-09-10
+
+**症状**：1280 宽正常，390 宽 `document.documentElement.scrollWidth` 比视口宽 259px，
+页面能横向滚。查元素时只报出表格（440px），但表格在 `overflow-x:auto` 容器里、其实是被裁掉的假阳性
+（`getBoundingClientRect()` 对被裁的子元素照样返回未裁剪的位置）。
+
+**真凶是术语气泡**：`.term::after{position:absolute;left:0;width:280px;opacity:0}`。
+`opacity:0` 只是看不见，**它仍然占布局**，靠近右边的术语就把页面撑宽了。
+
+**修法**：默认 `display:none`，hover / focus 时才 `display:block`；宽度用
+`width:max-content;max-width:min(300px,68vw)`。这样收起时完全不参与布局。
+
+**排查手法记一下**：判断页面是不是真的横向滚，用
+`window.scrollTo(400,0); window.scrollX` ——大于 0 才是真滚动；
+逐元素比 `rect.right > clientWidth` 会被 `overflow:auto` 容器里的内容误导。
+
+---
+
 ## 已解决（保留记录，避免重复踩）
 
 ### 表格数组单元格不解析 `[[术语]]`
